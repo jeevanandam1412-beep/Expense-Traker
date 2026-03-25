@@ -1,317 +1,252 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View, ScrollView, StyleSheet, FlatList, Dimensions, Alert,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, Alert,
 } from 'react-native';
-import {
-  Text, useTheme, Button, Surface, Divider, ActivityIndicator, Portal, Dialog, TextInput,
-} from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { BarChart, PieChart } from 'react-native-chart-kit';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import { useApp } from '../store/AppContext';
-import FilterBar from '../components/FilterBar';
-import { DATE_FILTERS } from '../utils/constants';
-import { getDateRange, isInRange, formatDate, getLast7DayLabels, getLast7DayValues } from '../utils/dateHelpers';
-import { totalIncome, totalExpense, profit, categoryBreakdown } from '../utils/calculations';
-import dayjs from 'dayjs';
+import { Ionicons } from '@expo/vector-icons';
+import { useApp } from '../context/AppContext';
+import { colors } from '../theme/colors';
+import Header from '../components/Header';
 
-const { width } = Dimensions.get('window');
+const FILTERS = ['Today', 'Yesterday', 'Last 7 Days', 'Last Month', 'All'];
+
+function inFilter(dateStr, filter) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  if (filter === 'Today') return d.toDateString() === now.toDateString();
+  if (filter === 'Yesterday') {
+    const y = new Date(now); y.setDate(y.getDate() - 1);
+    return d.toDateString() === y.toDateString();
+  }
+  if (filter === 'Last 7 Days') {
+    const s = new Date(now); s.setDate(now.getDate() - 7);
+    return d >= s;
+  }
+  if (filter === 'Last Month') {
+    const s = new Date(now); s.setMonth(now.getMonth() - 1);
+    return d >= s;
+  }
+  return true;
+}
 
 export default function ReportsScreen() {
-  const theme = useTheme();
-  const { income, expenses, settings } = useApp();
-  const [filter, setFilter] = useState('7days');
-  const [customStart, setCustomStart] = useState(dayjs().subtract(7, 'day').format('YYYY-MM-DD'));
-  const [customEnd, setCustomEnd] = useState(dayjs().format('YYYY-MM-DD'));
-  const [showCustom, setShowCustom] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const { state } = useApp();
+  const { income, expenses, borrowed, settings } = state;
+  const currency = settings?.currency || '₹';
 
-  const { start, end } = useMemo(
-    () => getDateRange(filter, customStart, customEnd),
-    [filter, customStart, customEnd]
-  );
+  const [filter, setFilter] = useState('All');
 
-  const filteredIncome = useMemo(() => income.filter((i) => isInRange(i.date, start, end)), [income, start, end]);
-  const filteredExpenses = useMemo(() => expenses.filter((e) => isInRange(e.date, start, end)), [expenses, start, end]);
+  const data = useMemo(() => {
+    const filtIncome = income.filter(i => inFilter(i.createdAt, filter));
+    const filtExpenses = expenses.filter(e => inFilter(e.createdAt, filter));
+    const totalIncome = filtIncome.reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+    const totalExpense = filtExpenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+    const netProfit = totalIncome - totalExpense;
+    const transactions = filtIncome.length + filtExpenses.length;
 
-  const tIncome = useMemo(() => totalIncome(filteredIncome), [filteredIncome]);
-  const tExpense = useMemo(() => totalExpense(filteredExpenses), [filteredExpenses]);
-  const tProfit = useMemo(() => profit(filteredIncome, filteredExpenses), [tIncome, tExpense]);
-  const categories = useMemo(() => categoryBreakdown(filteredExpenses), [filteredExpenses]);
+    // Combine and sort
+    const allTx = [
+      ...filtIncome.map(i => ({ ...i, type: 'income' })),
+      ...filtExpenses.map(e => ({ ...e, type: 'expense' })),
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  const labels = getLast7DayLabels();
-  const incData = getLast7DayValues(filteredIncome);
-  const expData = getLast7DayValues(filteredExpenses);
+    // Category breakdown for expenses
+    const catMap = {};
+    filtExpenses.forEach(e => {
+      const c = e.category || 'Other';
+      catMap[c] = (catMap[c] || 0) + parseFloat(e.amount || 0);
+    });
+    const categories = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
 
-  const sym = settings.currency;
-
-  const handleFilter = (v) => {
-    setFilter(v);
-    if (v === 'custom') setShowCustom(true);
-  };
-
-  const chartConfig = {
-    backgroundGradientFrom: theme.colors.surface,
-    backgroundGradientTo: theme.colors.surface,
-    color: (opacity = 1) => `rgba(103, 80, 164, ${opacity})`,
-    labelColor: () => theme.colors.onSurfaceVariant,
-    strokeWidth: 2,
-    propsForBackgroundLines: { stroke: theme.colors.surfaceVariant },
-    decimalPlaces: 0,
-  };
-
-  // Generate PDF
-  const generatePDF = async () => {
-    setGenerating(true);
-    try {
-      const allTx = [
-        ...filteredIncome.map((i) => ({ ...i, _type: 'Income', _sub: i.source })),
-        ...filteredExpenses.map((e) => ({ ...e, _type: 'Expense', _sub: e.category })),
-      ].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-      const rows = allTx.map((tx) => `
-        <tr style="border-bottom:1px solid #eee">
-          <td style="padding:8px">${tx.date}</td>
-          <td style="padding:8px">${tx._type}</td>
-          <td style="padding:8px">${tx._sub}</td>
-          <td style="padding:8px;text-align:right;color:${tx._type === 'Income' ? '#26A69A' : '#EF5350'}">
-            ${tx._type === 'Income' ? '+' : '-'}${sym}${parseFloat(tx.amount).toLocaleString('en-IN')}
-          </td>
-          <td style="padding:8px;color:#888">${tx.notes || '-'}</td>
-        </tr>
-      `).join('');
-
-      const catRows = categories.map((c) => `
-        <tr>
-          <td style="padding:6px">${c.name}</td>
-          <td style="padding:6px;text-align:right;color:#EF5350">${sym}${c.amount.toLocaleString('en-IN')}</td>
-        </tr>
-      `).join('');
-
-      const html = `
-        <!DOCTYPE html><html><head>
-        <meta charset="utf-8">
-        <style>
-          body { font-family: 'Helvetica', sans-serif; padding: 24px; color: #1a1a1a; }
-          h1 { color: #5C6BC0; margin-bottom: 4px; }
-          .subtitle { color: #666; margin-bottom: 24px; font-size: 13px; }
-          .summary { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-          .card { background: #f5f5f5; border-radius: 12px; padding: 16px; min-width: 140px; flex: 1; }
-          .card-label { font-size: 11px; color: #888; margin-bottom: 4px; }
-          .card-value { font-size: 22px; font-weight: bold; }
-          table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-          th { background: #f0f0f0; padding: 10px 8px; text-align: left; font-size: 12px; }
-          tr:nth-child(even) { background: #fafafa; }
-          h2 { color: #333; margin-top: 24px; font-size: 16px; }
-        </style>
-        </head><body>
-        <h1>📊 ${settings.storeName}</h1>
-        <div class="subtitle">Expense Report · ${start.format('DD MMM YYYY')} – ${end.format('DD MMM YYYY')}</div>
-        
-        <div class="summary">
-          <div class="card">
-            <div class="card-label">TOTAL INCOME</div>
-            <div class="card-value" style="color:#26A69A">${sym}${tIncome.toLocaleString('en-IN')}</div>
-          </div>
-          <div class="card">
-            <div class="card-label">TOTAL EXPENSE</div>
-            <div class="card-value" style="color:#EF5350">${sym}${tExpense.toLocaleString('en-IN')}</div>
-          </div>
-          <div class="card">
-            <div class="card-label">PROFIT / LOSS</div>
-            <div class="card-value" style="color:${tProfit >= 0 ? '#5C6BC0' : '#EF5350'}">${tProfit < 0 ? '-' : ''}${sym}${Math.abs(tProfit).toLocaleString('en-IN')}</div>
-          </div>
-        </div>
-
-        ${categories.length ? `
-        <h2>Expense by Category</h2>
-        <table>
-          <tr><th>Category</th><th style="text-align:right">Amount</th></tr>
-          ${catRows}
-        </table>` : ''}
-
-        <h2>All Transactions</h2>
-        <table>
-          <tr>
-            <th>Date</th><th>Type</th><th>Category/Source</th>
-            <th style="text-align:right">Amount</th><th>Notes</th>
-          </tr>
-          ${rows || '<tr><td colspan="5" style="padding:16px;text-align:center;color:#999">No transactions in this period</td></tr>'}
-        </table>
-
-        <div style="margin-top:32px;font-size:11px;color:#999;text-align:center">
-          Generated on ${dayjs().format('DD MMM YYYY, hh:mm A')} · ${settings.storeName}
-        </div>
-        </body></html>
-      `;
-
-      const { uri } = await Print.printToFileAsync({ html, base64: false });
-      setGenerating(false);
-      return uri;
-    } catch (e) {
-      setGenerating(false);
-      Alert.alert('Error', 'Failed to generate PDF');
-      return null;
+    // Weekly data (last 7 days)
+    const weekData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const dayStr = d.toDateString();
+      const inc = income.filter(x => new Date(x.createdAt).toDateString() === dayStr).reduce((s, x) => s + parseFloat(x.amount || 0), 0);
+      const exp = expenses.filter(x => new Date(x.createdAt).toDateString() === dayStr).reduce((s, x) => s + parseFloat(x.amount || 0), 0);
+      weekData.push({ label: d.toLocaleDateString('en-IN', { weekday: 'short' }), inc, exp });
     }
-  };
 
-  const handleDownload = async () => {
-    const uri = await generatePDF();
-    if (uri && await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
-    }
-  };
+    return { totalIncome, totalExpense, netProfit, transactions, allTx, categories, weekData };
+  }, [income, expenses, filter]);
 
-  const allTx = [
-    ...filteredIncome.map((i) => ({ ...i, _type: 'Income', _sub: i.source })),
-    ...filteredExpenses.map((e) => ({ ...e, _type: 'Expense', _sub: e.category })),
-  ].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const fmt = (n) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const maxBar = Math.max(...data.weekData.map(d => Math.max(d.inc, d.exp)), 1);
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text variant="headlineSmall" style={styles.title}>📊 Reports</Text>
-        </View>
+    <View style={styles.root}>
+      <Header title="Reports" />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        <FilterBar options={DATE_FILTERS} selected={filter} onSelect={handleFilter} />
-
-        {/* Summary Cards */}
-        <View style={styles.summaryRow}>
-          {[
-            { label: 'Income', value: tIncome, color: '#26A69A' },
-            { label: 'Expense', value: tExpense, color: '#EF5350' },
-            { label: tProfit >= 0 ? 'Profit' : 'Loss', value: Math.abs(tProfit), color: tProfit >= 0 ? '#5C6BC0' : '#EF5350' },
-          ].map((s) => (
-            <Surface key={s.label} style={[styles.summaryCard, { backgroundColor: s.color + '15' }]} elevation={0}>
-              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>{s.label}</Text>
-              <Text variant="titleSmall" style={{ fontWeight: '800', color: s.color }}>
-                {sym}{s.value.toLocaleString('en-IN')}
-              </Text>
-            </Surface>
+        {/* Filter */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ gap: 8, paddingRight: 20 }}>
+          {FILTERS.map(f => (
+            <TouchableOpacity key={f} style={[styles.chip, filter === f && styles.chipActive]} onPress={() => setFilter(f)}>
+              <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>{f}</Text>
+            </TouchableOpacity>
           ))}
+        </ScrollView>
+
+        {/* Summary Grid */}
+        <View style={styles.summaryGrid}>
+          <StatCard label="Total Income" value={`${currency}${fmt(data.totalIncome)}`} color={colors.tertiary} />
+          <StatCard label="Total Expense" value={`${currency}${fmt(data.totalExpense)}`} color={colors.secondary} />
+          <StatCard label="Net Profit" value={`${currency}${fmt(data.netProfit)}`} color={data.netProfit >= 0 ? colors.primary : colors.error} />
+          <StatCard label="Transactions" value={`${data.transactions}`} color={colors.onSurface} />
         </View>
 
-        {/* Bar Chart */}
-        {(tIncome > 0 || tExpense > 0) && (
-          <Surface style={[styles.chartCard, { backgroundColor: theme.colors.surface }]} elevation={2}>
-            <Text variant="titleSmall" style={styles.chartTitle}>Income vs Expense (Last 7 Days)</Text>
-            <BarChart
-              data={{ labels, datasets: [{ data: incData }] }}
-              width={width - 64}
-              height={160}
-              chartConfig={{ ...chartConfig, color: () => '#26A69A' }}
-              style={{ borderRadius: 12 }}
-              fromZero
-              showBarTops={false}
-            />
-          </Surface>
-        )}
-
-        {/* Pie Chart */}
-        {categories.length > 0 && (
-          <Surface style={[styles.chartCard, { backgroundColor: theme.colors.surface }]} elevation={2}>
-            <Text variant="titleSmall" style={styles.chartTitle}>Expense by Category</Text>
-            <PieChart
-              data={categories.map((c) => ({ ...c, population: c.amount }))}
-              width={width - 64}
-              height={180}
-              chartConfig={chartConfig}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              absolute
-            />
-          </Surface>
-        )}
-
-        {/* Transaction Table */}
-        <Surface style={[styles.tableCard, { backgroundColor: theme.colors.surface }]} elevation={2}>
-          <Text variant="titleSmall" style={styles.chartTitle}>
-            Transactions ({allTx.length})
-          </Text>
-          <View style={styles.tableHeader}>
-            {['Date', 'Type', 'Category', 'Amount'].map((h) => (
-              <Text key={h} variant="labelSmall" style={[styles.tableHeaderCell, { color: theme.colors.onSurfaceVariant }]}>{h}</Text>
+        {/* Cash Flow Chart */}
+        <View style={styles.chartCard}>
+          <View style={styles.chartHeader}>
+            <Text style={styles.cardTitle}>Cash Flow Analysis</Text>
+            <View style={styles.legend}>
+              <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.tertiary }]} /><Text style={styles.legendText}>Income</Text></View>
+              <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.secondary }]} /><Text style={styles.legendText}>Expense</Text></View>
+            </View>
+          </View>
+          <View style={styles.chartBars}>
+            {data.weekData.map(({ label, inc, exp }) => (
+              <View key={label} style={styles.barGroup}>
+                <View style={styles.barStack}>
+                  <View style={[styles.bar, styles.barInc, { height: Math.max(4, (inc / maxBar) * 90) }]} />
+                  <View style={[styles.bar, styles.barExp, { height: Math.max(4, (exp / maxBar) * 90) }]} />
+                </View>
+                <Text style={styles.barLabel}>{label}</Text>
+              </View>
             ))}
           </View>
-          <Divider />
-          {allTx.length === 0 ? (
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', padding: 24 }}>
-              No transactions in this period
-            </Text>
+        </View>
+
+        {/* Expense Categories */}
+        {data.categories.length > 0 && (
+          <View style={styles.chartCard}>
+            <Text style={styles.cardTitle}>Expenses by Category</Text>
+            <View style={{ gap: 12, marginTop: 12 }}>
+              {data.categories.map(([cat, val]) => {
+                const pct = data.totalExpense > 0 ? (val / data.totalExpense) * 100 : 0;
+                return (
+                  <View key={cat}>
+                    <View style={styles.catRow}>
+                      <Text style={styles.catName}>{cat}</Text>
+                      <Text style={styles.catPct}>{pct.toFixed(0)}% — {currency}{val.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</Text>
+                    </View>
+                    <View style={styles.progressBg}>
+                      <View style={[styles.progressFg, { width: `${pct}%`, backgroundColor: colors.secondary }]} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {/* Transactions Table */}
+        <View style={[styles.chartCard, { padding: 0, overflow: 'hidden' }]}>
+          <Text style={[styles.cardTitle, { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 }]}>All Transactions</Text>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.th, { flex: 2 }]}>Description</Text>
+            <Text style={styles.th}>Type</Text>
+            <Text style={[styles.th, { textAlign: 'right' }]}>Amount</Text>
+          </View>
+          {data.allTx.length === 0 ? (
+            <View style={styles.empty}>
+              <Ionicons name="receipt-outline" size={32} color={colors.outline} />
+              <Text style={styles.emptyText}>No transactions in this period</Text>
+            </View>
           ) : (
-            allTx.map((tx, idx) => (
-              <View key={tx.id} style={[styles.tableRow, idx % 2 === 0 && { backgroundColor: theme.colors.surfaceVariant + '30' }]}>
-                <Text style={styles.tableCell}>{formatDate(tx.date)}</Text>
-                <Text style={[styles.tableCell, { color: tx._type === 'Income' ? '#26A69A' : '#EF5350', fontWeight: '600' }]}>
-                  {tx._type}
-                </Text>
-                <Text style={styles.tableCell}>{tx._sub}</Text>
-                <Text style={[styles.tableCell, { color: tx._type === 'Income' ? '#26A69A' : '#EF5350', fontWeight: '700' }]}>
-                  {tx._type === 'Income' ? '+' : '-'}{sym}{parseFloat(tx.amount).toLocaleString('en-IN')}
+            data.allTx.map((tx, idx) => (
+              <View key={tx.id} style={[styles.tableRow, idx % 2 === 0 && { backgroundColor: colors.surfaceContainerLow + '60' }]}>
+                <View style={{ flex: 2 }}>
+                  <Text style={styles.tdMain} numberOfLines={1}>{tx.description || tx.source || 'Transaction'}</Text>
+                  <Text style={styles.tdSub}>{new Date(tx.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Text>
+                </View>
+                <View style={[styles.typeBadge, { backgroundColor: tx.type === 'income' ? colors.tertiary + '20' : colors.secondary + '20' }]}>
+                  <Text style={[styles.typeBadgeText, { color: tx.type === 'income' ? colors.tertiary : colors.secondary }]}>
+                    {tx.type === 'income' ? 'IN' : 'EX'}
+                  </Text>
+                </View>
+                <Text style={[styles.tdAmount, { color: tx.type === 'income' ? colors.tertiary : colors.secondary }]}>
+                  {tx.type === 'income' ? '+' : '-'}{currency}{parseFloat(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </Text>
               </View>
             ))
           )}
-        </Surface>
-
-        {/* Action Buttons */}
-        <View style={styles.actions}>
-          <Button
-            mode="contained"
-            icon="file-pdf-box"
-            onPress={handleDownload}
-            loading={generating}
-            style={[styles.actionBtn, { backgroundColor: '#EF5350' }]}
-          >
-            Export PDF
-          </Button>
-          <Button
-            mode="outlined"
-            icon="share-variant"
-            onPress={handleDownload}
-            style={styles.actionBtn}
-          >
-            Share
-          </Button>
         </View>
-
-        <View style={{ height: 32 }} />
       </ScrollView>
+    </View>
+  );
+}
 
-      {/* Custom date dialog */}
-      <Portal>
-        <Dialog visible={showCustom} onDismiss={() => setShowCustom(false)}>
-          <Dialog.Title>Custom Date Range</Dialog.Title>
-          <Dialog.Content style={{ gap: 12 }}>
-            <TextInput label="Start Date (YYYY-MM-DD)" value={customStart} onChangeText={setCustomStart} mode="outlined" />
-            <TextInput label="End Date (YYYY-MM-DD)" value={customEnd} onChangeText={setCustomEnd} mode="outlined" />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setShowCustom(false)}>Cancel</Button>
-            <Button onPress={() => setShowCustom(false)} mode="contained">Apply</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+function StatCard({ label, value, color }) {
+  return (
+    <View style={styles.statCard}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, { color }]}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  title: { fontWeight: '800' },
-  summaryRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginBottom: 8 },
-  summaryCard: { flex: 1, borderRadius: 14, padding: 12 },
-  chartCard: { marginHorizontal: 16, marginTop: 12, borderRadius: 20, padding: 16 },
-  chartTitle: { fontWeight: '700', marginBottom: 12 },
-  tableCard: { marginHorizontal: 16, marginTop: 12, borderRadius: 20, padding: 16, overflow: 'hidden' },
-  tableHeader: { flexDirection: 'row', paddingBottom: 8 },
-  tableHeaderCell: { flex: 1, fontWeight: '700' },
-  tableRow: { flexDirection: 'row', paddingVertical: 6, paddingHorizontal: 4, borderRadius: 6 },
-  tableCell: { flex: 1, fontSize: 11.5 },
-  actions: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, marginTop: 16 },
-  actionBtn: { flex: 1 },
+  root: { flex: 1, backgroundColor: colors.background },
+  scroll: { flex: 1 },
+  content: { paddingTop: 16, paddingBottom: 120 },
+  filterRow: { marginBottom: 16, paddingHorizontal: 20 },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerLow },
+  chipActive: { backgroundColor: colors.primaryContainer },
+  chipText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },
+  chipTextActive: { color: '#fff' },
+  summaryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 20, marginBottom: 16 },
+  statCard: {
+    width: '47%',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  statLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant, marginBottom: 6 },
+  statValue: { fontSize: 20, fontWeight: '800' },
+  chartCard: {
+    marginHorizontal: 20,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  chartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: colors.onSurface },
+  legend: { flexDirection: 'row', gap: 12 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 11, color: colors.onSurfaceVariant },
+  chartBars: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 110, paddingHorizontal: 4 },
+  barGroup: { flex: 1, alignItems: 'center', gap: 4 },
+  barStack: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
+  bar: { width: 10, borderRadius: 4 },
+  barInc: { backgroundColor: colors.tertiary },
+  barExp: { backgroundColor: colors.secondary },
+  barLabel: { fontSize: 9, color: colors.onSurfaceVariant, textTransform: 'uppercase', fontWeight: '600' },
+  catRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  catName: { fontSize: 13, fontWeight: '600', color: colors.onSurface },
+  catPct: { fontSize: 12, fontWeight: '600', color: colors.onSurfaceVariant },
+  progressBg: { height: 6, backgroundColor: colors.surfaceContainerHigh, borderRadius: 3, overflow: 'hidden' },
+  progressFg: { height: 6, borderRadius: 3 },
+  tableHeader: { flexDirection: 'row', backgroundColor: colors.surfaceContainerLow, paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center', gap: 8 },
+  th: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant },
+  tableRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer },
+  tdMain: { fontSize: 13, fontWeight: '600', color: colors.onSurface },
+  tdSub: { fontSize: 10, color: colors.onSurfaceVariant },
+  typeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, minWidth: 30, alignItems: 'center' },
+  typeBadgeText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
+  tdAmount: { fontSize: 13, fontWeight: '800', textAlign: 'right', flex: 1.5 },
+  empty: { alignItems: 'center', paddingVertical: 32, gap: 8 },
+  emptyText: { fontSize: 13, color: colors.onSurfaceVariant },
 });

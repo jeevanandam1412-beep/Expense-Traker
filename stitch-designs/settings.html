@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#3622ca",
+                        "on-surface-variant": "#464555",
+                        "inverse-surface": "#2d3135",
+                        "on-secondary-fixed": "#400012",
+                        "surface-tint": "#4f44e2",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#fd6483",
+                        "on-tertiary-fixed": "#002117",
+                        "surface-container-highest": "#e0e2e8",
+                        "inverse-on-surface": "#eff1f7",
+                        "surface-variant": "#e0e2e8",
+                        "primary-container": "#675df9",
+                        "tertiary-container": "#008466",
+                        "on-surface": "#181c20",
+                        "on-secondary-fixed-variant": "#8f0935",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#f5fff8",
+                        "surface-container-high": "#e6e8ee",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#777587",
+                        "surface-bright": "#f7f9ff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#00513d",
+                        "secondary-fixed": "#ffd9dd",
+                        "secondary-fixed-dim": "#ffb2bc",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#100069",
+                        "outline-variant": "#c7c4d8",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f1f3f9",
+                        "on-error": "#ffffff",
+                        "primary": "#4d41df",
+                        "tertiary": "#006950",
+                        "surface-dim": "#d8dae0",
+                        "surface-container": "#eceef4",
+                        "on-background": "#181c20",
+                        "inverse-primary": "#c4c0ff",
+                        "secondary": "#b0284b",
+                        "surface": "#f7f9ff",
+                        "tertiary-fixed": "#6bfbcd",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f7f9ff",
+                        "on-secondary-container": "#670023",
+                        "primary-fixed-dim": "#c4c0ff",
+                        "on-primary-container": "#fffbff",
+                        "primary-fixed": "#e3dfff",
+                        "tertiary-fixed-dim": "#49deb1"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 pt-12 pb-8 bg-gradient-to-br from-[#4D41DF] to-[#675DF9] dark:from-[#3A31A8] dark:to-[#4D41DF] text-white rounded-b-[24px] shadow-[0px_12px_32px_rgba(77,65,223,0.15)]">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white/20">
+<img alt="Store Owner Profile" data-alt="professional portrait of a confident entrepreneur in a modern office with soft cinematic lighting and blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxwMgjwyeim0kw8ryt8No1Su7qqT-Ul-ACtRbeQ9Oisn19nn6Ym6Q6I_rpE_mHmNyop2Xo4f1wqqmMqrBJAA2GGmFzRHCfVM8CeXcp68fSHQwcz0lzDQOu1O_soKBoJBvYmzYavr8kUM9vlJpBJUIjRyH29F4sLKqyrAyaIcU3oeIJ2YlbTmwzGYrTdMsEoUhPS2nptjaTPB47BR6ezl1ONrJvM7a_FyCeYZgAv1yHiHEUNYsJQJiJ2YVlTiISUX-H0_liXWD2Ee8"/>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-white">Store Ledger</h1>
+</div>
+<button class="hover:opacity-90 transition-opacity active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-[1.75rem]">calendar_today</span>
+</button>
+</header>
+<main class="mt-40 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Store Info Section -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-[1.375rem] font-semibold text-on-surface">Store Info</h2>
+<span class="material-symbols-outlined text-primary/40">storefront</span>
+</div>
+<div class="bg-surface-container-low rounded-[24px] p-6 space-y-5">
+<div class="space-y-1.5">
+<label class="text-[0.75rem] font-medium text-on-surface-variant uppercase tracking-[0.05em] ml-1">Store Name</label>
+<input class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl px-4 py-3 text-[0.875rem] focus:ring-primary focus:ring-2 transition-all" type="text" value="Main Street Boutique"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-[0.75rem] font-medium text-on-surface-variant uppercase tracking-[0.05em] ml-1">Store Owner Name</label>
+<input class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl px-4 py-3 text-[0.875rem] focus:ring-primary focus:ring-2 transition-all" type="text" value="Alex Morgan"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-[0.75rem] font-medium text-on-surface-variant uppercase tracking-[0.05em] ml-1">Currency</label>
+<select class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl px-4 py-3 text-[0.875rem] focus:ring-primary focus:ring-2 transition-all appearance-none">
+<option>USD ($)</option>
+<option>EUR (€)</option>
+<option>GBP (£)</option>
+<option>JPY (¥)</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Appearance Section -->
+<section class="space-y-4">
+<h2 class="text-[1.375rem] font-semibold text-on-surface">Appearance</h2>
+<div class="bg-surface-container-low rounded-[24px] p-6 space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-medium text-on-surface">Dark Mode</p>
+<p class="text-[0.75rem] text-on-surface-variant">Adjust interface for low light</p>
+</div>
+<button class="w-12 h-6 bg-outline-variant/30 rounded-full relative transition-colors duration-200">
+<span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform"></span>
+</button>
+</div>
+<div class="space-y-3">
+<p class="text-[0.75rem] font-medium text-on-surface-variant uppercase tracking-[0.05em]">Theme Preset</p>
+<div class="flex gap-4">
+<button class="w-10 h-10 rounded-full bg-primary ring-4 ring-primary-container ring-offset-2 ring-offset-surface-container-low transition-transform active:scale-90"></button>
+<button class="w-10 h-10 rounded-full bg-secondary transition-transform active:scale-90"></button>
+<button class="w-10 h-10 rounded-full bg-tertiary transition-transform active:scale-90"></button>
+<button class="w-10 h-10 rounded-full bg-[#FFB2BC] transition-transform active:scale-90"></button>
+<button class="w-10 h-10 rounded-full bg-[#181C20] transition-transform active:scale-90"></button>
+</div>
+</div>
+</div>
+</section>
+<!-- Email Config Section -->
+<section class="space-y-4">
+<h2 class="text-[1.375rem] font-semibold text-on-surface">Email Config</h2>
+<div class="bg-surface-container-low rounded-[24px] p-6 space-y-5">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<label class="text-[0.75rem] font-medium text-on-surface-variant uppercase tracking-[0.05em] ml-1">EmailJS ID</label>
+<input class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl px-4 py-3 text-[0.875rem] focus:ring-primary focus:ring-2 transition-all" type="password" value="service_sh39sk"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-[0.75rem] font-medium text-on-surface-variant uppercase tracking-[0.05em] ml-1">Template ID</label>
+<input class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl px-4 py-3 text-[0.875rem] focus:ring-primary focus:ring-2 transition-all" type="text" value="template_0vxa"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="text-[0.75rem] font-medium text-on-surface-variant uppercase tracking-[0.05em] ml-1">Public Key</label>
+<input class="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl px-4 py-3 text-[0.875rem] focus:ring-primary focus:ring-2 transition-all" type="password" value="user_91jskla92kksl"/>
+</div>
+<button class="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-semibold text-[0.875rem] shadow-[0px_8px_24px_rgba(77,65,223,0.15)] hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[1.2rem]">send</span>
+                    Test Email
+                </button>
+</div>
+</section>
+<!-- Data Management Section -->
+<section class="space-y-4">
+<h2 class="text-[1.375rem] font-semibold text-on-surface">Data Management</h2>
+<div class="bg-surface-container-low rounded-[24px] p-2">
+<div class="grid grid-cols-1 gap-1">
+<button class="flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">file_download</span>
+</div>
+<span class="font-medium">Export All Data</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<button class="flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container-high transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">file_upload</span>
+</div>
+<span class="font-medium">Import Data</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<button class="flex items-center justify-between p-4 rounded-2xl hover:bg-error-container/20 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined">delete_sweep</span>
+</div>
+<span class="font-medium text-error">Clear All Data</span>
+</div>
+<span class="material-symbols-outlined text-error/40 group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Footer Text -->
+<p class="text-center text-[0.75rem] text-on-surface-variant/40 pb-12">
+            Store Ledger v2.4.0 — Made for Editorial Accountants
+        </p>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 dark:bg-[#181C20]/80 backdrop-blur-[20px] rounded-t-[24px] shadow-[0px_-8px_24px_rgba(77,65,223,0.05)]">
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Income</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined">outbound</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Expenses</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Borrowed</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Reports</span>
+</div>
+</nav>
+</body></html>

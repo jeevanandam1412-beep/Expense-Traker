@@ -1,35 +1,32 @@
 {
   "expo": {
-    "name": "Expense Tracker",
-    "slug": "expense-tracker",
+    "name": "Store Ledger",
+    "slug": "store-ledger",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6750A4"
+      "backgroundColor": "#4D41DF"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.store.expensetracker"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.storeledger.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#6750A4"
+        "backgroundColor": "#4D41DF"
       },
-      "package": "com.store.expensetracker"
+      "package": "com.storeledger.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sharing"
+      "expo-font"
     ]
   }
 }

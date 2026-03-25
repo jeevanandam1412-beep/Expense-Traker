@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Store Ledger - Borrowed &amp; Lent</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#3622ca",
+              "on-surface-variant": "#464555",
+              "inverse-surface": "#2d3135",
+              "on-secondary-fixed": "#400012",
+              "surface-tint": "#4f44e2",
+              "on-secondary": "#ffffff",
+              "secondary-container": "#fd6483",
+              "on-tertiary-fixed": "#002117",
+              "surface-container-highest": "#e0e2e8",
+              "inverse-on-surface": "#eff1f7",
+              "surface-variant": "#e0e2e8",
+              "primary-container": "#675df9",
+              "tertiary-container": "#008466",
+              "on-surface": "#181c20",
+              "on-secondary-fixed-variant": "#8f0935",
+              "on-error-container": "#93000a",
+              "on-tertiary-container": "#f5fff8",
+              "surface-container-high": "#e6e8ee",
+              "surface-container-lowest": "#ffffff",
+              "outline": "#777587",
+              "surface-bright": "#f7f9ff",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed-variant": "#00513d",
+              "secondary-fixed": "#ffd9dd",
+              "secondary-fixed-dim": "#ffb2bc",
+              "error": "#ba1a1a",
+              "on-primary-fixed": "#100069",
+              "outline-variant": "#c7c4d8",
+              "error-container": "#ffdad6",
+              "surface-container-low": "#f1f3f9",
+              "on-error": "#ffffff",
+              "primary": "#4d41df",
+              "tertiary": "#006950",
+              "surface-dim": "#d8dae0",
+              "surface-container": "#eceef4",
+              "on-background": "#181c20",
+              "inverse-primary": "#c4c0ff",
+              "secondary": "#b0284b",
+              "surface": "#f7f9ff",
+              "tertiary-fixed": "#6bfbcd",
+              "on-tertiary": "#ffffff",
+              "background": "#f7f9ff",
+              "on-secondary-container": "#670023",
+              "primary-fixed-dim": "#c4c0ff",
+              "on-primary-container": "#fffbff",
+              "primary-fixed": "#e3dfff",
+              "tertiary-fixed-dim": "#49deb1"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-sheet {
+            background: rgba(247, 249, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 pt-12 pb-8 bg-gradient-to-br from-[#4D41DF] to-[#675DF9] dark:from-[#3A31A8] dark:to-[#4D41DF] rounded-b-[24px] shadow-[0px_12px_32px_rgba(77,65,223,0.15)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold border border-white/10">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</div>
+<h1 class="text-[1.75rem] font-bold font-headline tracking-tight text-white">Store Ledger</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center text-white opacity-80 hover:opacity-90 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</button>
+</header>
+<main class="mt-40 px-6">
+<!-- Summary Section: The Digital Ledger Style -->
+<section class="mb-8">
+<div class="bg-surface-container-low rounded-xl p-6 shadow-[0px_12px_32px_rgba(77,65,223,0.05)] overflow-hidden relative">
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="flex flex-col gap-6">
+<div>
+<span class="text-[0.75rem] font-medium font-inter uppercase tracking-[0.05em] text-on-surface-variant">Net Balance</span>
+<div class="text-[3.5rem] font-bold font-headline leading-tight tracking-[-0.02em] text-primary">
+                            $1,240.00
+                        </div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-4 rounded-lg">
+<span class="block text-[0.75rem] font-medium font-inter uppercase tracking-[0.05em] text-on-surface-variant mb-1">Total Lent</span>
+<span class="text-xl font-bold font-headline text-tertiary">+$2,800.00</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-lg">
+<span class="block text-[0.75rem] font-medium font-inter uppercase tracking-[0.05em] text-on-surface-variant mb-1">Total Borrowed</span>
+<span class="text-xl font-bold font-headline text-secondary">-$1,560.00</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Segmented Control / Tabs -->
+<div class="flex p-1 bg-surface-container-high rounded-full mb-8">
+<button class="flex-1 py-2 text-[0.875rem] font-semibold rounded-full bg-primary-container text-on-primary-container shadow-sm">Borrowed</button>
+<button class="flex-1 py-2 text-[0.875rem] font-medium text-on-surface-variant hover:text-on-surface transition-colors">Lent</button>
+</div>
+<!-- Ledger List -->
+<div class="flex flex-col gap-4">
+<!-- Entry 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 flex items-center gap-4 group transition-all duration-200">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold text-lg font-headline">
+                    JS
+                </div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="text-[1.125rem] font-semibold font-inter text-on-surface">John Smith</h3>
+<span class="text-[1.125rem] font-bold font-headline text-secondary">$450.00</span>
+</div>
+<div class="flex justify-between items-center mt-1">
+<span class="text-[0.875rem] text-on-surface-variant font-inter">Due in 3 days</span>
+<span class="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[0.75rem] font-bold uppercase tracking-wider">Pending</span>
+</div>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 flex items-center gap-4 group transition-all duration-200">
+<div class="w-12 h-12 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-lg font-headline">
+                    MA
+                </div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="text-[1.125rem] font-semibold font-inter text-on-surface">Maria Alvez</h3>
+<span class="text-[1.125rem] font-bold font-headline text-secondary">$1,110.00</span>
+</div>
+<div class="flex justify-between items-center mt-1">
+<span class="text-[0.875rem] text-on-surface-variant font-inter">Due in 12 days</span>
+<span class="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[0.75rem] font-bold uppercase tracking-wider">Pending</span>
+</div>
+</div>
+</div>
+<!-- Entry 3 (Paid State Example) -->
+<div class="bg-surface-dim/40 rounded-xl p-5 flex items-center gap-4 group transition-all duration-200 opacity-80">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center font-bold text-lg font-headline">
+                    DK
+                </div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="text-[1.125rem] font-semibold font-inter text-on-surface">David Kim</h3>
+<span class="text-[1.125rem] font-bold font-headline text-on-surface-variant line-through">$200.00</span>
+</div>
+<div class="flex justify-between items-center mt-1">
+<span class="text-[0.875rem] text-on-surface-variant font-inter">Paid yesterday</span>
+<span class="px-2.5 py-0.5 rounded-full bg-tertiary-container text-white text-[0.75rem] font-bold uppercase tracking-wider">Paid</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed right-6 bottom-28 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4D41DF] to-[#675DF9] text-white flex items-center justify-center shadow-[0px_12px_32px_rgba(77,65,223,0.3)] z-50 active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 dark:bg-[#181C20]/80 backdrop-blur-[20px] rounded-t-[24px] shadow-[0px_-8px_24px_rgba(77,65,223,0.05)] z-50">
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Income</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined" data-icon="outbound">outbound</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Expenses</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#F1F3F9] dark:bg-[#2A2D35] text-[#4D41DF] dark:text-[#675DF9] rounded-[16px] px-4 py-2 scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="handshake" style="font-variation-settings: 'FILL' 1;">handshake</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Borrowed</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#181C20]/60 dark:text-white/60 px-4 py-2 hover:bg-[#F1F3F9] dark:hover:bg-[#2A2D35] transition-colors">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-[10px] font-medium font-inter uppercase tracking-[0.05em] mt-1">Reports</span>
+</div>
+</nav>
+<!-- Bottom Sheet (Static Visual Representation) -->
+<div class="fixed inset-0 bg-on-surface/20 z-[60] backdrop-blur-sm flex flex-col justify-end hidden">
+<div class="glass-sheet rounded-t-[32px] p-8 pb-12 w-full max-w-lg mx-auto shadow-[0px_-12px_48px_rgba(0,0,0,0.1)]">
+<div class="w-12 h-1 bg-outline-variant/40 rounded-full mx-auto mb-8"></div>
+<h2 class="text-[1.375rem] font-semibold font-headline text-on-surface mb-6">Add New Entry</h2>
+<form class="flex flex-col gap-5">
+<div class="flex p-1 bg-surface-container-high rounded-full w-fit mx-auto mb-2">
+<button class="px-6 py-2 text-[0.875rem] font-semibold rounded-full bg-primary-container text-on-primary-container" type="button">Borrowed</button>
+<button class="px-6 py-2 text-[0.875rem] font-medium text-on-surface-variant" type="button">Lent</button>
+</div>
+<div class="relative">
+<label class="absolute -top-2.5 left-4 px-1 bg-white text-[0.75rem] font-bold text-primary uppercase tracking-wider">Person Name</label>
+<input class="w-full h-14 px-4 rounded-xl border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary bg-surface-container-lowest outline-none font-inter text-on-surface" placeholder="e.g. Sarah Connor" type="text"/>
+</div>
+<div class="relative">
+<label class="absolute -top-2.5 left-4 px-1 bg-white text-[0.75rem] font-bold text-primary uppercase tracking-wider">Amount</label>
+<input class="w-full h-14 px-4 rounded-xl border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary bg-surface-container-lowest outline-none font-inter text-on-surface" placeholder="0.00" type="number"/>
+</div>
+<div class="relative">
+<label class="absolute -top-2.5 left-4 px-1 bg-white text-[0.75rem] font-bold text-primary uppercase tracking-wider">Due Date</label>
+<input class="w-full h-14 px-4 rounded-xl border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary bg-surface-container-lowest outline-none font-inter text-on-surface" type="date"/>
+</div>
+<div class="relative">
+<label class="absolute -top-2.5 left-4 px-1 bg-white text-[0.75rem] font-bold text-primary uppercase tracking-wider">Notes</label>
+<textarea class="w-full h-24 p-4 rounded-xl border-none ring-1 ring-outline-variant/30 focus:ring-2 focus:ring-primary bg-surface-container-lowest outline-none font-inter text-on-surface resize-none" placeholder="What is this for?"></textarea>
+</div>
+<button class="w-full h-14 mt-4 rounded-xl bg-gradient-to-br from-[#4D41DF] to-[#675DF9] text-white font-bold text-[1rem] shadow-[0px_8px_24px_rgba(77,65,223,0.3)] active:scale-[0.98] transition-all" type="submit">
+                    Save Entry
+                </button>
+</form>
+</div>
+</div>
+</body></html>

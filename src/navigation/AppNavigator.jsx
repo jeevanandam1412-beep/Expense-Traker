@@ -1,102 +1,127 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from 'react-native-paper';
-import { useApp } from '../store/AppContext';
-
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../theme/colors';
 import DashboardScreen from '../screens/DashboardScreen';
 import IncomeScreen from '../screens/IncomeScreen';
 import ExpenseScreen from '../screens/ExpenseScreen';
-import BorrowedScreen from '../screens/BorrowedScreen';
+import BorrowedLentScreen from '../screens/BorrowedLentScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { useApp } from '../context/AppContext';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 
-function TabNavigator() {
-  const theme = useTheme();
+const TAB_ICONS = {
+  Dashboard: { active: 'home', inactive: 'home-outline' },
+  Income: { active: 'cash', inactive: 'cash-outline' },
+  Expenses: { active: 'trending-down', inactive: 'trending-down-outline' },
+  Borrowed: { active: 'people', inactive: 'people-outline' },
+  Reports: { active: 'bar-chart', inactive: 'bar-chart-outline' },
+  Settings: { active: 'settings', inactive: 'settings-outline' },
+};
+
+function TabBarIcon({ name, focused }) {
+  const icons = TAB_ICONS[name];
+  if (!icons) return null;
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.surfaceVariant,
-          height: 62,
-          paddingBottom: 8,
-        },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        headerStyle: { backgroundColor: theme.colors.surface, elevation: 0, shadowOpacity: 0 },
-        headerTintColor: theme.colors.onSurface,
-        headerTitleStyle: { fontWeight: '700', fontSize: 18 },
-      })}
-    >
-      <Tab.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{
-          tabBarLabel: 'Home',
-          tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />,
-        }}
+    <View style={[styles.iconWrapper, focused && styles.iconWrapperActive]}>
+      <Ionicons
+        name={focused ? icons.active : icons.inactive}
+        size={20}
+        color={focused ? colors.primary : colors.navInactive}
       />
-      <Tab.Screen
-        name="Income"
-        component={IncomeScreen}
-        options={{
-          title: 'Income',
-          tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="trending-up" color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name="Expense"
-        component={ExpenseScreen}
-        options={{
-          title: 'Expenses',
-          tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="trending-down" color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name="Borrowed"
-        component={BorrowedScreen}
-        options={{
-          title: 'Borrowed',
-          tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="handshake" color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name="Reports"
-        component={ReportsScreen}
-        options={{
-          title: 'Reports',
-          tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="chart-bar" color={color} size={size} />,
-        }}
-      />
-    </Tab.Navigator>
+      <Text style={[styles.label, focused && styles.labelActive]}>{name}</Text>
+    </View>
   );
 }
 
 export default function AppNavigator() {
-  const { settings } = useApp();
-  const isDark = settings.theme === 'dark';
-
-  const navTheme = isDark
-    ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: '#0F0F0F' } }
-    : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: '#F5F5F5' } };
-
   return (
-    <NavigationContainer theme={navTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Main" component={TabNavigator} />
-        <Stack.Screen
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: styles.tabBar,
+          tabBarShowLabel: false,
+        }}
+      >
+        <Tab.Screen
+          name="Dashboard"
+          component={DashboardScreen}
+          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Dashboard" focused={focused} /> }}
+        />
+        <Tab.Screen
+          name="Income"
+          component={IncomeScreen}
+          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Income" focused={focused} /> }}
+        />
+        <Tab.Screen
+          name="Borrowed"
+          component={BorrowedLentScreen}
+          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Borrowed" focused={focused} /> }}
+        />
+        <Tab.Screen
+          name="Expenses"
+          component={ExpenseScreen}
+          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Expenses" focused={focused} /> }}
+        />
+        <Tab.Screen
+          name="Reports"
+          component={ReportsScreen}
+          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Reports" focused={focused} /> }}
+        />
+        <Tab.Screen
           name="Settings"
           component={SettingsScreen}
-          options={{ headerShown: true, title: 'Settings', presentation: 'modal' }}
+          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Settings" focused={focused} /> }}
         />
-      </Stack.Navigator>
+      </Tab.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === 'ios' ? 88 : 72,
+    backgroundColor: colors.navBackground,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 0,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  iconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 2,
+    minWidth: 56,
+  },
+  iconWrapperActive: {
+    backgroundColor: colors.navActiveBg,
+  },
+  label: {
+    fontSize: 5,
+    fontWeight: '600',
+    color: colors.navInactive,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  labelActive: {
+    color: colors.primary,
+  },
+});

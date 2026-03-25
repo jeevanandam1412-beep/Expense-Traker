@@ -1,0 +1,66 @@
+// Material Design 3 Color Tokens from Stitch Design
+export const colors = {
+  primary: '#4D41DF',
+  primaryContainer: '#675DF9',
+  onPrimary: '#FFFFFF',
+  onPrimaryContainer: '#FFFBFF',
+  primaryFixed: '#E3DFFF',
+  primaryFixedDim: '#C4C0FF',
+
+  secondary: '#B0284B',
+  secondaryContainer: '#FD6483',
+  onSecondary: '#FFFFFF',
+  onSecondaryContainer: '#670023',
+  secondaryFixed: '#FFD9DD',
+  secondaryFixedDim: '#FFB2BC',
+
+  tertiary: '#006950',
+  tertiaryContainer: '#008466',
+  onTertiary: '#FFFFFF',
+  onTertiaryContainer: '#F5FFF8',
+  tertiaryFixed: '#6BFBCD',
+  tertiaryFixedDim: '#49DEB1',
+
+  surface: '#F7F9FF',
+  surfaceBright: '#F7F9FF',
+  surfaceDim: '#D8DAE0',
+  surfaceVariant: '#E0E2E8',
+  surfaceContainer: '#ECEEF4',
+  surfaceContainerLow: '#F1F3F9',
+  surfaceContainerHigh: '#E6E8EE',
+  surfaceContainerHighest: '#E0E2E8',
+  surfaceContainerLowest: '#FFFFFF',
+
+  onSurface: '#181C20',
+  onSurfaceVariant: '#464555',
+  onBackground: '#181C20',
+  background: '#F7F9FF',
+
+  outline: '#777587',
+  outlineVariant: '#C7C4D8',
+
+  error: '#BA1A1A',
+  errorContainer: '#FFDAD6',
+  onError: '#FFFFFF',
+  onErrorContainer: '#93000A',
+
+  inverseSurface: '#2D3135',
+  inverseOnSurface: '#EFF1F7',
+  inversePrimary: '#C4C0FF',
+  surfaceTint: '#4F44E2',
+
+  // Custom accent
+  orange: '#F97316',
+
+  // Gradient
+  gradientStart: '#4D41DF',
+  gradientEnd: '#675DF9',
+
+  // Nav background
+  navBackground: 'rgba(255,255,255,0.92)',
+  navActive: '#4D41DF',
+  navInactive: 'rgba(24,28,32,0.5)',
+  navActiveBg: '#F1F3F9',
+};
+
+export default colors;

@@ -1,143 +1,242 @@
 import React, { useState, useMemo } from 'react';
-import { View, FlatList, StyleSheet, SectionList } from 'react-native';
-import { Text, useTheme, FAB, Searchbar, Portal, Dialog, Button, Chip } from 'react-native-paper';
-import { useApp } from '../store/AppContext';
-import TransactionItem from '../components/TransactionItem';
-import AddEntryModal from '../components/AddEntryModal';
-import FilterBar from '../components/FilterBar';
-import { DATE_FILTERS, EXPENSE_CATEGORIES, getCategoryColor } from '../utils/constants';
-import { getDateRange, isInRange } from '../utils/dateHelpers';
-import { totalExpense } from '../utils/calculations';
+import {
+  View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Alert, Platform,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useApp } from '../context/AppContext';
+import { colors } from '../theme/colors';
+import Header from '../components/Header';
+import TransactionCard from '../components/TransactionCard';
+import AddModal from '../components/AddModal';
+
+const FILTERS = ['Today', 'This Week', 'This Month', 'All'];
+
+function inFilter(dateStr, filter) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  if (filter === 'Today') return d.toDateString() === now.toDateString();
+  if (filter === 'This Week') {
+    const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+    return d >= start;
+  }
+  if (filter === 'This Month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  return true;
+}
 
 export default function ExpenseScreen() {
-  const theme = useTheme();
-  const { expenses, settings, addExpense, editExpense, deleteExpense } = useApp();
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('7days');
-  const [catFilter, setCatFilter] = useState('All');
-  const [modal, setModal] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [deleteId, setDeleteId] = useState(null);
+  const { state, actions } = useApp();
+  const { expenses, settings } = state;
+  const currency = settings?.currency || '₹';
 
-  const { start, end } = useMemo(() => getDateRange(filter), [filter]);
+  const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   const filtered = useMemo(() => {
-    return expenses.filter((item) => {
-      const inRange = isInRange(item.date, start, end);
-      const inSearch = search
-        ? item.category?.toLowerCase().includes(search.toLowerCase()) ||
-          item.notes?.toLowerCase().includes(search.toLowerCase())
-        : true;
-      const inCat = catFilter === 'All' ? true : item.category === catFilter;
-      return inRange && inSearch && inCat;
+    return expenses.filter(i => {
+      const matchesFilter = inFilter(i.createdAt, filter);
+      const matchesSearch = !search || (i.description || '').toLowerCase().includes(search.toLowerCase()) ||
+        (i.category || '').toLowerCase().includes(search.toLowerCase());
+      return matchesFilter && matchesSearch;
     });
-  }, [expenses, start, end, search, catFilter]);
+  }, [expenses, filter, search]);
 
-  const total = useMemo(() => totalExpense(filtered), [filtered]);
+  const total = filtered.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
 
-  const grouped = useMemo(() => {
-    const map = {};
-    filtered.forEach((e) => {
-      const cat = e.category || 'Other';
-      if (!map[cat]) map[cat] = [];
-      map[cat].push(e);
+  // Category totals
+  const categoryTotals = useMemo(() => {
+    const cats = {};
+    filtered.forEach(e => {
+      const c = e.category || 'Other';
+      cats[c] = (cats[c] || 0) + parseFloat(e.amount || 0);
     });
-    return Object.entries(map).map(([title, data]) => ({ title, data }));
+    return Object.entries(cats).sort((a, b) => b[1] - a[1]).slice(0, 3);
   }, [filtered]);
 
-  const handleEdit = (item) => { setEditing(item); setModal(true); };
-  const handleDelete = (id) => setDeleteId(id);
-  const confirmDelete = () => { deleteExpense(deleteId); setDeleteId(null); };
-  const handleSubmit = (data) => {
-    if (editing) { editExpense({ ...data, id: editing.id }); setEditing(null); }
-    else addExpense(data);
+  const handleDelete = (id) => {
+    Alert.alert('Delete Expense', 'Are you sure?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => actions.deleteExpense(id) },
+    ]);
   };
 
-  const catOptions = [{ label: 'All', value: 'All' }, ...EXPENSE_CATEGORIES.map(c => ({ label: c.label, value: c.value }))];
+  // Group by category
+  const grouped = useMemo(() => {
+    const groups = {};
+    filtered.forEach(item => {
+      const key = item.category || 'Other';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item);
+    });
+    return groups;
+  }, [filtered]);
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <Text variant="headlineSmall" style={styles.title}>💸 Expenses</Text>
-        <Text variant="bodyLarge" style={{ color: '#EF5350', fontWeight: '700' }}>
-          {settings.currency}{total.toLocaleString('en-IN')}
-        </Text>
-      </View>
-      <Searchbar
-        placeholder="Search expenses..."
-        value={search}
-        onChangeText={setSearch}
-        style={[styles.search, { backgroundColor: theme.colors.surface }]}
-        elevation={0}
-      />
-      <FilterBar options={DATE_FILTERS} selected={filter} onSelect={setFilter} />
-      <FilterBar
-        options={catOptions}
-        selected={catFilter}
-        onSelect={setCatFilter}
-        style={{ paddingTop: 0 }}
-      />
+    <View style={styles.root}>
+      <Header title="Expenses" />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Total Banner */}
+        <View style={styles.totalBanner}>
+          <Text style={styles.totalLabel}>TOTAL EXPENSES ({filter})</Text>
+          <Text style={styles.totalValue}>{currency}{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
+        </View>
 
-      <SectionList
-        sections={grouped}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TransactionItem
-            item={item}
-            type="expense"
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            currency={settings.currency}
+        {/* Category Summary */}
+        {categoryTotals.length > 0 && (
+          <View style={styles.categoryRow}>
+            {categoryTotals.map(([cat, val]) => (
+              <View key={cat} style={styles.catCard}>
+                <Text style={styles.catLabel}>{cat}</Text>
+                <Text style={styles.catValue}>{currency}{val.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Search */}
+        <View style={styles.searchBox}>
+          <Ionicons name="search-outline" size={18} color={colors.outline} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search expenses..."
+            placeholderTextColor={colors.outline}
+            value={search}
+            onChangeText={setSearch}
           />
-        )}
-        renderSectionHeader={({ section: { title, data } }) => (
-          <View style={[styles.sectionHeader, { backgroundColor: theme.colors.background }]}>
-            <View style={[styles.catDot, { backgroundColor: getCategoryColor(title) }]} />
-            <Text variant="labelLarge" style={{ fontWeight: '700', color: theme.colors.onSurface }}>
-              {title}
-            </Text>
-            <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 'auto' }}>
-              {settings.currency}{data.reduce((s, e) => s + parseFloat(e.amount || 0), 0).toLocaleString('en-IN')}
-            </Text>
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 4 }}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>No expenses found</Text>
-          </View>
-        }
-      />
+          {search ? <TouchableOpacity onPress={() => setSearch('')}><Ionicons name="close-circle" size={18} color={colors.outline} /></TouchableOpacity> : null}
+        </View>
 
-      <FAB icon="plus" style={[styles.fab, { backgroundColor: '#EF5350' }]} color="white" onPress={() => { setEditing(null); setModal(true); }} />
-      <AddEntryModal
-        visible={modal}
-        mode="expense"
-        initial={editing}
-        onDismiss={() => { setModal(false); setEditing(null); }}
-        onSubmit={handleSubmit}
+        {/* Filter Chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ gap: 8, paddingRight: 20 }}>
+          {FILTERS.map(f => (
+            <TouchableOpacity
+              key={f}
+              style={[styles.chip, filter === f && styles.chipActive]}
+              onPress={() => setFilter(f)}
+            >
+              <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>{f}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Grouped by category */}
+        {Object.keys(grouped).length === 0 ? (
+          <View style={styles.empty}>
+            <Ionicons name="trending-down-outline" size={48} color={colors.outline} />
+            <Text style={styles.emptyText}>No expenses yet</Text>
+            <Text style={styles.emptySubText}>Tap + to add an expense</Text>
+          </View>
+        ) : (
+          Object.entries(grouped).map(([catLabel, items]) => {
+            const catTotal = items.reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+            return (
+              <View key={catLabel} style={styles.group}>
+                <View style={styles.groupHeader}>
+                  <View style={styles.groupLeftRow}>
+                    <View style={[styles.dot, { backgroundColor: colors.primary }]} />
+                    <Text style={styles.groupLabel}>{catLabel}</Text>
+                  </View>
+                  <Text style={styles.groupTotal}>Total: {currency}{catTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
+                </View>
+                {items.map(item => (
+                  <TransactionCard
+                    key={item.id}
+                    item={item}
+                    type="expense"
+                    currency={currency}
+                    onDelete={() => handleDelete(item.id)}
+                  />
+                ))}
+              </View>
+            );
+          })
+        )}
+      </ScrollView>
+
+      {/* FAB */}
+      <TouchableOpacity style={styles.fab} onPress={() => setShowModal(true)} activeOpacity={0.85}>
+        <Ionicons name="add" size={28} color="#fff" />
+      </TouchableOpacity>
+
+      <AddModal
+        visible={showModal}
+        type="expense"
+        currency={currency}
+        onClose={() => setShowModal(false)}
+        onSave={actions.addExpense}
       />
-      <Portal>
-        <Dialog visible={!!deleteId} onDismiss={() => setDeleteId(null)}>
-          <Dialog.Title>Delete Entry?</Dialog.Title>
-          <Dialog.Content><Text>This action cannot be undone.</Text></Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setDeleteId(null)}>Cancel</Button>
-            <Button textColor="#EF5350" onPress={confirmDelete}>Delete</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  title: { fontWeight: '800' },
-  search: { marginHorizontal: 16, marginBottom: 4, borderRadius: 16 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 8, gap: 8 },
-  catDot: { width: 10, height: 10, borderRadius: 5 },
-  empty: { alignItems: 'center', marginTop: 60 },
-  fab: { position: 'absolute', right: 20, bottom: 24 },
+  root: { flex: 1, backgroundColor: colors.background },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 120 },
+  totalBanner: {
+    backgroundColor: colors.secondary + '15',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.secondary,
+  },
+  totalLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: colors.secondary, marginBottom: 4 },
+  totalValue: { fontSize: 26, fontWeight: '800', color: colors.secondary },
+  categoryRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
+  catCard: {
+    flex: 1,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 14,
+    padding: 12,
+    alignItems: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  catLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, color: colors.outline, marginBottom: 4 },
+  catValue: { fontSize: 16, fontWeight: '800', color: colors.onSurface },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 10,
+    marginBottom: 12,
+  },
+  searchInput: { flex: 1, fontSize: 15, color: colors.onSurface },
+  filterRow: { marginBottom: 16, marginHorizontal: -20, paddingLeft: 20 },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerHigh },
+  chipActive: { backgroundColor: colors.primary },
+  chipText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },
+  chipTextActive: { color: '#fff' },
+  group: { marginBottom: 20 },
+  groupHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '40', paddingBottom: 8, marginBottom: 10 },
+  groupLeftRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  groupLabel: { fontSize: 15, fontWeight: '800', color: colors.onSurface },
+  groupTotal: { fontSize: 13, fontWeight: '700', color: colors.secondary },
+  empty: { alignItems: 'center', paddingVertical: 60, gap: 8 },
+  emptyText: { fontSize: 16, fontWeight: '700', color: colors.onSurfaceVariant },
+  emptySubText: { fontSize: 13, color: colors.outline },
+  fab: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 108 : 88,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 20,
+    backgroundColor: colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.secondary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 10,
+  },
 });
