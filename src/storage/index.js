@@ -100,7 +100,7 @@ export const getSettings = async () => {
     storeName: 'Mohan Kumar Store',
     ownerName: 'Mohan Kumar',
     currency: '₹',
-    emailjsId: 'service_default',
+    emailjsId: 'service_lj9wpjj',
     templateId: 'template_s6phynr',
     publicKey: '53t1-d_UTg-gfD4EQ',
     privateKey: 'GQmKge4zh6PFx0RLqmwCj',
@@ -112,7 +112,7 @@ export const getSettings = async () => {
     const parsed = JSON.parse(data);
     if (!parsed.publicKey) parsed.publicKey = defaults.publicKey;
     if (!parsed.privateKey) parsed.privateKey = defaults.privateKey;
-    if (!parsed.emailjsId) parsed.emailjsId = defaults.emailjsId;
+    if (!parsed.emailjsId || parsed.emailjsId === 'service_default') parsed.emailjsId = defaults.emailjsId;
     if (!parsed.templateId) parsed.templateId = defaults.templateId;
     return parsed;
   } catch (e) {

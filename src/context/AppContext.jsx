@@ -16,7 +16,7 @@ const initialState = {
     storeName: 'Mohan Kumar Store',
     ownerName: 'Mohan Kumar',
     currency: '₹',
-    emailjsId: 'service_default',
+    emailjsId: 'service_lj9wpjj',
     templateId: 'template_s6phynr',
     publicKey: '53t1-d_UTg-gfD4EQ',
     privateKey: 'GQmKge4zh6PFx0RLqmwCj',
