@@ -17,6 +17,7 @@ export default function DashboardScreen({ navigation }) {
   const currency = settings?.currency || '₹';
 
   const [modalType, setModalType] = useState(null);
+  const [editItem, setEditItem] = useState(null);
 
   const totals = useMemo(() => {
     const totalIncome = income.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
@@ -38,9 +39,36 @@ export default function DashboardScreen({ navigation }) {
   const fmt = (n) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const handleSave = async (item) => {
-    if (modalType === 'income') await actions.addIncome(item);
-    else if (modalType === 'expense') await actions.addExpense(item);
-    else if (modalType === 'borrowed') await actions.addBorrowed(item);
+    if (modalType === 'income') {
+      if (item.id) await actions.updateIncome(item.id, item);
+      else await actions.addIncome(item);
+    } else if (modalType === 'expense') {
+      if (item.id) await actions.updateExpense(item.id, item);
+      else await actions.addExpense(item);
+    } else if (modalType === 'borrowed') {
+      if (item.id) await actions.updateBorrowed(item.id, item);
+      else await actions.addBorrowed(item);
+    }
+  };
+
+  const handleDelete = (item) => {
+    Alert.alert('Delete Entry', 'Remove this transaction?', [
+      { text: 'Cancel', style: 'cancel' },
+      { 
+        text: 'Delete', 
+        style: 'destructive', 
+        onPress: () => {
+          if (item.type === 'income') actions.deleteIncome(item.id);
+          if (item.type === 'expense') actions.deleteExpense(item.id);
+          if (item.type === 'borrowed') actions.deleteBorrowed(item.id);
+        }
+      },
+    ]);
+  };
+
+  const handleEdit = (item) => {
+    setEditItem(item);
+    setModalType(item.type);
   };
 
   return (
@@ -64,9 +92,9 @@ export default function DashboardScreen({ navigation }) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Add</Text>
           <View style={styles.quickActions}>
-            <QuickAction label="Income" icon="add-circle" color={colors.tertiary} onPress={() => setModalType('income')} />
-            <QuickAction label="Expense" icon="remove-circle" color={colors.secondary} onPress={() => setModalType('expense')} />
-            <QuickAction label="Borrowed" icon="people" color={colors.orange} onPress={() => setModalType('borrowed')} />
+            <QuickAction label="Income" icon="add-circle" color={colors.tertiary} onPress={() => { setEditItem(null); setModalType('income'); }} />
+            <QuickAction label="Expense" icon="remove-circle" color={colors.secondary} onPress={() => { setEditItem(null); setModalType('expense'); }} />
+            <QuickAction label="Borrowed" icon="people" color={colors.orange} onPress={() => { setEditItem(null); setModalType('borrowed'); }} />
           </View>
         </View>
 
@@ -95,7 +123,14 @@ export default function DashboardScreen({ navigation }) {
             </View>
           ) : (
             recentTransactions.map(t => (
-              <TransactionCard key={t.id} item={t} type={t.type} currency={currency} />
+              <TransactionCard 
+                key={t.id} 
+                item={t} 
+                type={t.type} 
+                currency={currency} 
+                onDelete={() => handleDelete(t)}
+                onEdit={handleEdit}
+              />
             ))
           )}
         </View>
@@ -104,8 +139,9 @@ export default function DashboardScreen({ navigation }) {
       <AddModal
         visible={!!modalType}
         type={modalType}
+        initialData={editItem}
         currency={currency}
-        onClose={() => setModalType(null)}
+        onClose={() => { setModalType(null); setEditItem(null); }}
         onSave={handleSave}
       />
     </View>

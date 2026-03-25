@@ -3,6 +3,8 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import { useApp } from '../context/AppContext';
 import { colors } from '../theme/colors';
 import Header from '../components/Header';
@@ -73,6 +75,129 @@ export default function ReportsScreen() {
   const fmt = (n) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const maxBar = Math.max(...data.weekData.map(d => Math.max(d.inc, d.exp)), 1);
 
+  const generateHtml = () => {
+    const tableRows = data.allTx.map(tx => `
+      <tr>
+        <td>${new Date(tx.createdAt).toLocaleDateString('en-IN')}</td>
+        <td><span class="badge ${tx.type}">${tx.type.toUpperCase()}</span></td>
+        <td>${tx.description || tx.source || tx.category || 'Transaction'}</td>
+        <td style="text-align: right; font-weight: bold; color: ${tx.type === 'income' ? '#22c55e' : '#ef4444'};">
+          ${tx.type === 'income' ? '+' : '-'}${currency}${parseFloat(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `).join('');
+
+    return `
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #1e293b; }
+            h1 { color: #0f172a; margin-bottom: 5px; }
+            .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+            .grid { display: flex; gap: 10px; margin-bottom: 30px; }
+            .card { flex: 1; padding: 15px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+            .card-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; }
+            .card-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { text-align: left; padding: 12px; background: #f1f5f9; color: #475569; font-size: 12px; text-transform: uppercase; }
+            td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+            .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+            .income { background: #dcfce7; color: #16a34a; }
+            .expense { background: #fee2e2; color: #dc2626; }
+            .footer { margin-top: 40px; text-align: center; color: #94a3b8; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <h1>${settings?.storeName || 'Store Ledger'}</h1>
+          <div class="subtitle">Financial Report • ${filter} • Generated on ${new Date().toLocaleString('en-IN')}</div>
+          
+          <div class="grid">
+            <div class="card">
+              <div class="card-label">Total Income</div>
+              <div class="card-value" style="color: #16a34a;">${currency}${fmt(data.totalIncome)}</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Total Expense</div>
+              <div class="card-value" style="color: #dc2626;">${currency}${fmt(data.totalExpense)}</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Net Profit</div>
+              <div class="card-value">${currency}${fmt(data.netProfit)}</div>
+            </div>
+          </div>
+
+          <h3>Transactions</h3>
+          <table>
+            <tr><th>Date</th><th>Type</th><th>Description</th><th style="text-align: right;">Amount</th></tr>
+            ${tableRows}
+          </table>
+
+          <div class="footer">
+            Generated securely by ${settings?.storeName || 'the Store Ledger app'}.
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      const { uri } = await Print.printToFileAsync({ html: generateHtml() });
+      await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+    } catch (e) {
+      Alert.alert('Error', 'Failed to generate PDF.');
+    }
+  };
+
+  const handleEmailReport = async () => {
+    if (settings?.publicKey && settings?.templateId) {
+      try {
+        const { base64 } = await Print.printToFileAsync({ html: generateHtml(), base64: true });
+        const pdfDataUrl = `data:application/pdf;base64,${base64}`;
+
+        const payload = {
+          service_id: settings.emailjsId || 'service_default',
+          template_id: settings.templateId,
+          user_id: settings.publicKey,
+          accessToken: settings.privateKey,
+          template_params: {
+            store_name: settings?.storeName || 'Store Ledger',
+            report_period: filter,
+            total_income: `${currency}${fmt(data.totalIncome)}`,
+            total_expense: `${currency}${fmt(data.totalExpense)}`,
+            net_profit: `${currency}${fmt(data.netProfit)}`,
+            pdf_attachment: pdfDataUrl,
+          }
+        };
+
+        const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        
+        if (res.ok) {
+           Alert.alert('Success', 'Report successfully sent via EmailJS!');
+           return;
+        } else {
+           const errText = await res.text();
+           console.log('EmailJS Error:', errText);
+           Alert.alert('EmailJS Error', 'Failed to send via EmailJS. Falling back to default mail app.');
+        }
+      } catch (e) {
+        console.log('EmailJS Network Error', e);
+      }
+    }
+
+    try {
+      const { uri } = await Print.printToFileAsync({ html: generateHtml() });
+      await Sharing.shareAsync(uri, { dialogTitle: 'Email Report' });
+    } catch (e) {
+      Alert.alert('Error', 'Failed to email report.');
+    }
+  };
+
   return (
     <View style={styles.root}>
       <Header title="Reports" />
@@ -86,6 +211,18 @@ export default function ReportsScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        {/* Actions */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.tertiary + '1A' }]} onPress={handleDownloadPDF}>
+            <Ionicons name="download-outline" size={20} color={colors.tertiary} />
+            <Text style={[styles.actionBtnText, { color: colors.tertiary }]}>Save PDF</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary + '1A' }]} onPress={handleEmailReport}>
+            <Ionicons name="mail-outline" size={20} color={colors.primary} />
+            <Text style={[styles.actionBtnText, { color: colors.primary }]}>Email Report</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Summary Grid */}
         <View style={styles.summaryGrid}>
@@ -191,6 +328,9 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: { paddingTop: 16, paddingBottom: 120 },
   filterRow: { marginBottom: 16, paddingHorizontal: 20 },
+  actionRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 20, marginBottom: 16 },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12 },
+  actionBtnText: { fontSize: 13, fontWeight: '700' },
   chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerLow },
   chipActive: { backgroundColor: colors.primaryContainer },
   chipText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },

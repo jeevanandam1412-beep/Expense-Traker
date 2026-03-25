@@ -25,6 +25,7 @@ export default function SettingsScreen() {
   const [emailjsId, setEmailjsId] = useState('');
   const [templateId, setTemplateId] = useState('');
   const [publicKey, setPublicKey] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
@@ -36,12 +37,13 @@ export default function SettingsScreen() {
       setEmailjsId(settings.emailjsId || '');
       setTemplateId(settings.templateId || '');
       setPublicKey(settings.publicKey || '');
+      setPrivateKey(settings.privateKey || '');
       setDarkMode(settings.darkMode || false);
     }
   }, [settings]);
 
   const handleSave = async () => {
-    await actions.saveSettings({ storeName, ownerName, currency, emailjsId, templateId, publicKey, darkMode });
+    await actions.saveSettings({ storeName, ownerName, currency, emailjsId, templateId, publicKey, privateKey, darkMode });
     Alert.alert('Saved', 'Settings saved successfully!');
   };
 
@@ -120,6 +122,8 @@ export default function SettingsScreen() {
           <SettingField label="Template ID" value={templateId} onChangeText={setTemplateId} placeholder="template_xxx" icon="document-outline" />
           <Divider />
           <SettingField label="Public Key" value={publicKey} onChangeText={setPublicKey} placeholder="xxxxxxxxxxxxxxx" icon="key-outline" secureTextEntry />
+          <Divider />
+          <SettingField label="Private Key" value={privateKey} onChangeText={setPrivateKey} placeholder="xxxxxxxxxxxxxxx" icon="lock-closed-outline" secureTextEntry />
         </View>
 
         {/* Save Button */}

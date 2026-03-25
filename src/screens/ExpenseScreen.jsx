@@ -31,6 +31,7 @@ export default function ExpenseScreen() {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
 
   const filtered = useMemo(() => {
     return expenses.filter(i => {
@@ -54,10 +55,23 @@ export default function ExpenseScreen() {
   }, [filtered]);
 
   const handleDelete = (id) => {
-    Alert.alert('Delete Expense', 'Are you sure?', [
+    Alert.alert('Delete Entry', 'Remove this expense record?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => actions.deleteExpense(id) },
     ]);
+  };
+
+  const handleEdit = (item) => {
+    setEditItem(item);
+    setShowModal(true);
+  };
+
+  const handleSave = async (item) => {
+    if (item.id) {
+      await actions.updateExpense(item.id, item);
+    } else {
+      await actions.addExpense(item);
+    }
   };
 
   // Group by category
@@ -145,6 +159,7 @@ export default function ExpenseScreen() {
                     type="expense"
                     currency={currency}
                     onDelete={() => handleDelete(item.id)}
+                    onEdit={handleEdit}
                   />
                 ))}
               </View>
@@ -154,16 +169,17 @@ export default function ExpenseScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={() => setShowModal(true)} activeOpacity={0.85}>
+      <TouchableOpacity style={styles.fab} onPress={() => { setEditItem(null); setShowModal(true); }} activeOpacity={0.85}>
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
 
       <AddModal
         visible={showModal}
         type="expense"
+        initialData={editItem}
         currency={currency}
         onClose={() => setShowModal(false)}
-        onSave={actions.addExpense}
+        onSave={handleSave}
       />
     </View>
   );

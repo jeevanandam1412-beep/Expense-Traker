@@ -28,9 +28,10 @@ export default function IncomeScreen() {
   const { income, settings } = state;
   const currency = settings?.currency || '₹';
 
-  const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('All'); // All, This Month, This Year
   const [showModal, setShowModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
 
   const filtered = useMemo(() => {
     return income.filter(i => {
@@ -44,10 +45,23 @@ export default function IncomeScreen() {
   const total = filtered.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
 
   const handleDelete = (id) => {
-    Alert.alert('Delete Income', 'Are you sure?', [
+    Alert.alert('Delete Entry', 'Remove this income record?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => actions.deleteIncome(id) },
     ]);
+  };
+
+  const handleEdit = (item) => {
+    setEditItem(item);
+    setShowModal(true);
+  };
+
+  const handleSave = async (item) => {
+    if (item.id) {
+      await actions.updateIncome(item.id, item);
+    } else {
+      await actions.addIncome(item);
+    }
   };
 
   // Group by date
@@ -118,6 +132,7 @@ export default function IncomeScreen() {
                   type="income"
                   currency={currency}
                   onDelete={() => handleDelete(item.id)}
+                  onEdit={handleEdit}
                 />
               ))}
             </View>
@@ -126,16 +141,17 @@ export default function IncomeScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={() => setShowModal(true)} activeOpacity={0.85}>
+      <TouchableOpacity style={styles.fab} onPress={() => { setEditItem(null); setShowModal(true); }} activeOpacity={0.85}>
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
 
       <AddModal
         visible={showModal}
         type="income"
+        initialData={editItem}
         currency={currency}
         onClose={() => setShowModal(false)}
-        onSave={actions.addIncome}
+        onSave={handleSave}
       />
     </View>
   );

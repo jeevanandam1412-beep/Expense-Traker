@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #181c20; background-color: #f7f9ff; padding: 20px; line-height: 1.6;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e0e2e8; box-shadow: 0 4px 12px rgba(77, 65, 223, 0.05);">
+    
+    <h2 style="color: #4d41df; border-bottom: 2px solid #e3dfff; padding-bottom: 12px; margin-top: 0; font-size: 24px;">
+      {{store_name}} - Financial Report
+    </h2>
+    
+    <p style="font-size: 16px; color: #464555;">
+      Here is your automated financial summary for the period: <strong style="color: #181c20;">{{report_period}}</strong>.
+    </p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 16px;">
+      <tr style="background-color: #f1f3f9;">
+        <td style="padding: 14px; border: 1px solid #e0e2e8; width: 50%; color: #464555;"><strong>Total Income</strong></td>
+        <td style="padding: 14px; border: 1px solid #e0e2e8; color: #16a34a; font-weight: 800; text-align: right;">{{total_income}}</td>
+      </tr>
+      <tr>
+        <td style="padding: 14px; border: 1px solid #e0e2e8; color: #464555;"><strong>Total Expense</strong></td>
+        <td style="padding: 14px; border: 1px solid #e0e2e8; color: #dc2626; font-weight: 800; text-align: right;">{{total_expense}}</td>
+      </tr>
+      <tr style="background-color: #f1f3f9;">
+        <td style="padding: 14px; border: 1px solid #e0e2e8; color: #464555;"><strong>Net Profit</strong></td>
+        <td style="padding: 14px; border: 1px solid #e0e2e8; color: #4d41df; font-weight: 800; text-align: right;">{{net_profit}}</td>
+      </tr>
+    </table>
+
+    <p style="font-size: 12px; color: #777587; text-align: center; margin-top: 40px; border-top: 1px solid #e0e2e8; padding-top: 20px;">
+      This report was generated automatically via the Store Ledger app using EmailJS.
+    </p>
+
+  </div>
+</body>
+</html>
