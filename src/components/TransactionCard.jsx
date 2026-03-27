@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useApp } from '../context/AppContext'; // Assuming useApp is from a context file
 
-export default function TransactionCard({ item, type, currency = '₹', onDelete, onEdit }) {
-  const [menuVisible, setMenuVisible] = useState(false);
+export default function TransactionCard({ item, type, currency, onDelete, onEdit }) {
+  const { t } = useApp();
+  const [showMenu, setShowMenu] = useState(false);
   const isIncome = type === 'income';
   const isExpense = type === 'expense';
   const isBorrowed = type === 'borrowed';
@@ -40,22 +42,22 @@ export default function TransactionCard({ item, type, currency = '₹', onDelete
           </View>
         ) : null}
       </View>
-      <TouchableOpacity style={styles.menuBtn} onPress={() => setMenuVisible(true)}>
+      <TouchableOpacity style={styles.menuBtn} onPress={() => setShowMenu(true)}>
         <Ionicons name="ellipsis-vertical" size={20} color={colors.outline} />
       </TouchableOpacity>
 
-      <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
-        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+      <Modal visible={showMenu} transparent animationType="fade" onRequestClose={() => setShowMenu(false)}>
+        <TouchableWithoutFeedback onPress={() => setShowMenu(false)}>
           <View style={styles.menuOverlay}>
             <View style={styles.menuBox}>
-              <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); if (onEdit) onEdit(item); }}>
+              <TouchableOpacity style={styles.menuItem} onPress={() => { setShowMenu(false); onEdit?.(item); }}>
                 <Ionicons name="pencil-outline" size={18} color={colors.onSurface} />
-                <Text style={styles.menuItemText}>Edit</Text>
+                <Text style={styles.menuItemText}>{t('edit')}</Text>
               </TouchableOpacity>
               <View style={styles.menuDivider} />
-              <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); if (onDelete) onDelete(); }}>
+              <TouchableOpacity style={styles.menuItem} onPress={() => { setShowMenu(false); onDelete?.(item); }}>
                 <Ionicons name="trash-outline" size={18} color={colors.error} />
-                <Text style={[styles.menuItemText, { color: colors.error }]}>Delete</Text>
+                <Text style={[styles.menuItemText, { color: colors.error }]}>{t('delete')}</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -104,6 +104,7 @@ export const getSettings = async () => {
     templateId: 'template_s6phynr',
     publicKey: '53t1-d_UTg-gfD4EQ',
     privateKey: 'GQmKge4zh6PFx0RLqmwCj',
+    language: 'en',
     darkMode: false,
   };
   try {
@@ -114,6 +115,7 @@ export const getSettings = async () => {
     if (!parsed.privateKey) parsed.privateKey = defaults.privateKey;
     if (!parsed.emailjsId || parsed.emailjsId === 'service_default') parsed.emailjsId = defaults.emailjsId;
     if (!parsed.templateId) parsed.templateId = defaults.templateId;
+    if (!parsed.language) parsed.language = defaults.language;
     return parsed;
   } catch (e) {
     return defaults;

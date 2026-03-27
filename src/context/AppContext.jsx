@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import {
-  getIncome, addIncome, deleteIncome, updateIncome,
-  getExpenses, addExpense, deleteExpense, updateExpense,
-  getBorrowed, addBorrowed, deleteBorrowed, updateBorrowed,
-  getSettings, saveSettings, clearAllData,
-} from '../storage';
+import { getIncome, getExpenses, getBorrowed, getSettings, addIncome, updateIncome, deleteIncome, addExpense, updateExpense, deleteExpense, addBorrowed, updateBorrowed, deleteBorrowed, saveSettings, clearAllData } from '../storage';
+import { translate } from '../i18n/translations';
 
 const AppContext = createContext(null);
 
@@ -20,6 +16,7 @@ const initialState = {
     templateId: 'template_s6phynr',
     publicKey: '53t1-d_UTg-gfD4EQ',
     privateKey: 'GQmKge4zh6PFx0RLqmwCj',
+    language: 'en',
     darkMode: false,
   },
   loading: true,
@@ -119,9 +116,12 @@ export function AppProvider({ children }) {
 }
 
 export function useApp() {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error('useApp must be inside AppProvider');
-  return ctx;
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  const t = (key) => translate(key, context.state.settings?.language || 'en');
+  return { ...context, t };
 }
 
 export default AppContext;

@@ -31,7 +31,7 @@ function inFilter(dateStr, filter) {
 }
 
 export default function ReportsScreen() {
-  const { state } = useApp();
+  const { state, t } = useApp();
   const { income, expenses, borrowed, settings } = state;
   const currency = settings?.currency || '₹';
 
@@ -192,22 +192,22 @@ export default function ReportsScreen() {
 
     try {
       const { uri } = await Print.printToFileAsync({ html: generateHtml() });
-      await Sharing.shareAsync(uri, { dialogTitle: 'Email Report' });
+      await Sharing.shareAsync(uri, { dialogTitle: t('email_report') });
     } catch (e) {
-      Alert.alert('Error', 'Failed to email report.');
+      Alert.alert(t('error'), t('failed_to_email_report'));
     }
   };
 
   return (
     <View style={styles.root}>
-      <Header title="Reports" />
+      <Header title={t('reports')} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* Filter */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ gap: 8, paddingRight: 20 }}>
           {FILTERS.map(f => (
             <TouchableOpacity key={f} style={[styles.chip, filter === f && styles.chipActive]} onPress={() => setFilter(f)}>
-              <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>{f}</Text>
+              <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>{t(f.toLowerCase().replace(/ /g, '_'))}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -216,29 +216,29 @@ export default function ReportsScreen() {
         <View style={styles.actionRow}>
           <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.tertiary + '1A' }]} onPress={handleDownloadPDF}>
             <Ionicons name="download-outline" size={20} color={colors.tertiary} />
-            <Text style={[styles.actionBtnText, { color: colors.tertiary }]}>Save PDF</Text>
+            <Text style={[styles.actionBtnText, { color: colors.tertiary }]}>{t('save_pdf')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary + '1A' }]} onPress={handleEmailReport}>
             <Ionicons name="mail-outline" size={20} color={colors.primary} />
-            <Text style={[styles.actionBtnText, { color: colors.primary }]}>Email Report</Text>
+            <Text style={[styles.actionBtnText, { color: colors.primary }]}>{t('email_report')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Summary Grid */}
         <View style={styles.summaryGrid}>
-          <StatCard label="Total Income" value={`${currency}${fmt(data.totalIncome)}`} color={colors.tertiary} />
-          <StatCard label="Total Expense" value={`${currency}${fmt(data.totalExpense)}`} color={colors.secondary} />
-          <StatCard label="Net Profit" value={`${currency}${fmt(data.netProfit)}`} color={data.netProfit >= 0 ? colors.primary : colors.error} />
-          <StatCard label="Transactions" value={`${data.transactions}`} color={colors.onSurface} />
+          <StatCard label={t('total_income')} value={`${currency}${fmt(data.totalIncome)}`} color={colors.tertiary} />
+          <StatCard label={t('total_expense')} value={`${currency}${fmt(data.totalExpense)}`} color={colors.secondary} />
+          <StatCard label={t('net_profit')} value={`${currency}${fmt(data.netProfit)}`} color={data.netProfit >= 0 ? colors.primary : colors.error} />
+          <StatCard label={t('transactions')} value={`${data.transactions}`} color={colors.onSurface} />
         </View>
 
         {/* Cash Flow Chart */}
         <View style={styles.chartCard}>
           <View style={styles.chartHeader}>
-            <Text style={styles.cardTitle}>Cash Flow Analysis</Text>
+            <Text style={styles.cardTitle}>{t('cash_flow_analysis')}</Text>
             <View style={styles.legend}>
-              <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.tertiary }]} /><Text style={styles.legendText}>Income</Text></View>
-              <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.secondary }]} /><Text style={styles.legendText}>Expense</Text></View>
+              <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.tertiary }]} /><Text style={styles.legendText}>{t('income')}</Text></View>
+              <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.secondary }]} /><Text style={styles.legendText}>{t('expenses')}</Text></View>
             </View>
           </View>
           <View style={styles.chartBars}>
@@ -257,7 +257,7 @@ export default function ReportsScreen() {
         {/* Expense Categories */}
         {data.categories.length > 0 && (
           <View style={styles.chartCard}>
-            <Text style={styles.cardTitle}>Expenses by Category</Text>
+            <Text style={styles.cardTitle}>{t('expenses_by_category')}</Text>
             <View style={{ gap: 12, marginTop: 12 }}>
               {data.categories.map(([cat, val]) => {
                 const pct = data.totalExpense > 0 ? (val / data.totalExpense) * 100 : 0;
@@ -279,16 +279,16 @@ export default function ReportsScreen() {
 
         {/* Transactions Table */}
         <View style={[styles.chartCard, { padding: 0, overflow: 'hidden' }]}>
-          <Text style={[styles.cardTitle, { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 }]}>All Transactions</Text>
+          <Text style={[styles.cardTitle, { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 }]}>{t('all_transactions')}</Text>
           <View style={styles.tableHeader}>
-            <Text style={[styles.th, { flex: 2 }]}>Description</Text>
-            <Text style={styles.th}>Type</Text>
-            <Text style={[styles.th, { textAlign: 'right' }]}>Amount</Text>
+            <Text style={[styles.th, { flex: 2 }]}>{t('description')}</Text>
+            <Text style={styles.th}>{t('type')}</Text>
+            <Text style={[styles.th, { textAlign: 'right' }]}>{t('amount')}</Text>
           </View>
           {data.allTx.length === 0 ? (
             <View style={styles.empty}>
               <Ionicons name="receipt-outline" size={32} color={colors.outline} />
-              <Text style={styles.emptyText}>No transactions in this period</Text>
+              <Text style={styles.emptyText}>{t('no_transactions_period')}</Text>
             </View>
           ) : (
             data.allTx.map((tx, idx) => (

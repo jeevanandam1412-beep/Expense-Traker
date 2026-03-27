@@ -15,8 +15,8 @@ const CURRENCIES = [
   { label: 'JPY (¥)', value: '¥' },
 ];
 
-export default function SettingsScreen() {
-  const { state, actions } = useApp();
+export default function SettingsScreen({ navigation }) {
+  const { state, actions, t } = useApp();
   const { settings } = state;
 
   const [storeName, setStoreName] = useState('');
@@ -26,6 +26,7 @@ export default function SettingsScreen() {
   const [templateId, setTemplateId] = useState('');
   const [publicKey, setPublicKey] = useState('');
   const [privateKey, setPrivateKey] = useState('');
+  const [language, setLanguage] = useState('en');
   const [darkMode, setDarkMode] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
@@ -38,65 +39,67 @@ export default function SettingsScreen() {
       setTemplateId(settings.templateId || '');
       setPublicKey(settings.publicKey || '');
       setPrivateKey(settings.privateKey || '');
+      setLanguage(settings.language || 'en');
       setDarkMode(settings.darkMode || false);
     }
   }, [settings]);
 
   const handleSave = async () => {
-    await actions.saveSettings({ storeName, ownerName, currency, emailjsId, templateId, publicKey, privateKey, darkMode });
-    Alert.alert('Saved', 'Settings saved successfully!');
+    await actions.saveSettings({ storeName, ownerName, currency, emailjsId, templateId, publicKey, privateKey, language, darkMode });
+    Alert.alert(t('success'), t('saved'));
   };
 
-  const handleClearData = () => {
-    Alert.alert(
-      'Clear All Data',
-      'This will permanently delete ALL income, expense and borrowed/lent records. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear All', style: 'destructive', onPress: () => { actions.clearAllData(); Alert.alert('Done', 'All data has been cleared.'); } },
+  const handleClear = () => {
+    Alert.alert(t('clear_all_data'), t('clear_warning'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('delete'), style: 'destructive', onPress: async () => { actions.clearAllData(); Alert.alert('Done', 'All data has been cleared.'); } },
       ]
     );
   };
 
   return (
     <View style={styles.root}>
-      <Header title="Settings" rightIcon="settings-outline" />
+      <Header title={t('settings')} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        {/* Store Info */}
-        <SectionHeader title="Store Info" icon="storefront-outline" />
+        {/* Profile */}
+        <SectionHeader title={t('store_profile')} icon="storefront-outline" />
         <View style={styles.card}>
-          <SettingField label="Store Name" value={storeName} onChangeText={setStoreName} placeholder="e.g. My Store" icon="business-outline" />
+          <SettingField label={t('store_name')} value={storeName} onChangeText={setStoreName} placeholder="..." icon="business-outline" />
           <Divider />
-          <SettingField label="Owner Name" value={ownerName} onChangeText={setOwnerName} placeholder="e.g. Your Name" icon="person-outline" />
-          <Divider />
-          <TouchableOpacity style={styles.selectRow} onPress={() => setShowCurrencyPicker(!showCurrencyPicker)}>
-            <Ionicons name="cash-outline" size={20} color={colors.primary} />
-            <View style={styles.selectInfo}>
-              <Text style={styles.settingLabel}>Currency</Text>
-              <Text style={styles.settingValue}>{CURRENCIES.find(c => c.value === currency)?.label || currency}</Text>
-            </View>
-            <Ionicons name={showCurrencyPicker ? 'chevron-up' : 'chevron-down'} size={18} color={colors.outline} />
-          </TouchableOpacity>
-          {showCurrencyPicker && (
-            <View style={styles.currencyPicker}>
-              {CURRENCIES.map(c => (
-                <TouchableOpacity
-                  key={c.value}
-                  style={[styles.currencyOption, currency === c.value && styles.currencyOptionActive]}
-                  onPress={() => { setCurrency(c.value); setShowCurrencyPicker(false); }}
-                >
-                  <Text style={[styles.currencyOptionText, currency === c.value && styles.currencyOptionTextActive]}>{c.label}</Text>
-                  {currency === c.value && <Ionicons name="checkmark" size={16} color={colors.primary} />}
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
+          <SettingField label={t('owner_name')} value={ownerName} onChangeText={setOwnerName} placeholder="..." icon="person-outline" />
         </View>
 
-        {/* Appearance */}
-        <SectionHeader title="Appearance" icon="color-palette-outline" />
+        {/* Preferences */}
+        <SectionHeader title={t('preferences')} icon="options-outline" />
         <View style={styles.card}>
+          <TouchableOpacity style={styles.settingRow} onPress={() => setShowCurrencyPicker(true)}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={styles.iconBox}><Ionicons name="cash-outline" size={20} color={colors.primary} /></View>
+              <Text style={styles.settingLabel}>{t('currency')}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.settingValue}>{currency}</Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.onSurfaceVariant} />
+            </View>
+          </TouchableOpacity>
+          <Divider />
+          <View style={styles.settingRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={styles.iconBox}><Ionicons name="language-outline" size={20} color={colors.primary} /></View>
+              <Text style={styles.settingLabel}>{t('language')}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', backgroundColor: colors.surfaceContainerLow, borderRadius: 8, overflow: 'hidden' }}>
+              <TouchableOpacity style={[styles.langBtn, language === 'en' && styles.langBtnActive]} onPress={() => setLanguage('en')}>
+                <Text style={[styles.langText, language === 'en' && styles.langTextActive]}>EN</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.langBtn, language === 'ta' && styles.langBtnActive]} onPress={() => setLanguage('ta')}>
+                <Text style={[styles.langText, language === 'ta' && styles.langTextActive]}>தமிழ்</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Divider />
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
               <Ionicons name="moon-outline" size={20} color={colors.primary} />
@@ -115,29 +118,33 @@ export default function SettingsScreen() {
         </View>
 
         {/* Email Config */}
-        <SectionHeader title="Email Config" icon="mail-outline" />
+        <SectionHeader title={t('email_config')} icon="mail-outline" />
         <View style={styles.card}>
-          <SettingField label="EmailJS Service ID" value={emailjsId} onChangeText={setEmailjsId} placeholder="service_xxx" icon="cloud-outline" secureTextEntry />
+          <SettingField label={t('emailjs_service_id')} value={emailjsId} onChangeText={setEmailjsId} placeholder="service_xxx" icon="cloud-outline" secureTextEntry />
           <Divider />
-          <SettingField label="Template ID" value={templateId} onChangeText={setTemplateId} placeholder="template_xxx" icon="document-outline" />
+          <SettingField label={t('template_id')} value={templateId} onChangeText={setTemplateId} placeholder="template_xxx" icon="document-outline" />
           <Divider />
-          <SettingField label="Public Key" value={publicKey} onChangeText={setPublicKey} placeholder="xxxxxxxxxxxxxxx" icon="key-outline" secureTextEntry />
+          <SettingField label={t('public_key')} value={publicKey} onChangeText={setPublicKey} placeholder="xxxxxxxxxxxxxxx" icon="key-outline" secureTextEntry />
           <Divider />
-          <SettingField label="Private Key" value={privateKey} onChangeText={setPrivateKey} placeholder="xxxxxxxxxxxxxxx" icon="lock-closed-outline" secureTextEntry />
+          <SettingField label={t('private_key')} value={privateKey} onChangeText={setPrivateKey} placeholder="xxxxxxxxxxxxxxx" icon="lock-closed-outline" secureTextEntry />
         </View>
 
         {/* Save Button */}
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.85}>
-          <Ionicons name="save-outline" size={20} color="#fff" />
-          <Text style={styles.saveBtnText}>Save Settings</Text>
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+          <Text style={styles.saveBtnText}>{t('save_settings')}</Text>
         </TouchableOpacity>
 
         {/* Data Management */}
-        <SectionHeader title="Data Management" icon="server-outline" />
-        <View style={styles.card}>
-          <DataAction icon="download-outline" label="Export All Data" color={colors.primary} onPress={() => Alert.alert('Coming Soon', 'Export feature coming soon!')} />
-          <Divider />
-          <DataAction icon="trash-outline" label="Clear All Data" color={colors.error} onPress={handleClearData} destructive />
+        <SectionHeader title={t('data_management')} icon="warning-outline" color={colors.error} />
+        <View style={[styles.card, { borderColor: colors.error + '40', borderWidth: 1 }]}>
+          <TouchableOpacity style={styles.settingRow} onPress={handleClear}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={[styles.iconBox, { backgroundColor: colors.error + '15' }]}>
+                <Ionicons name="trash-outline" size={20} color={colors.error} />
+              </View>
+              <Text style={[styles.settingLabel, { color: colors.error }]}>{t('clear_all_data')}</Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.version}>Store Ledger v1.0.0 — Made with ❤️</Text>
@@ -146,11 +153,11 @@ export default function SettingsScreen() {
   );
 }
 
-function SectionHeader({ title, icon }) {
+function SectionHeader({ title, icon, color }) {
   return (
     <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <Ionicons name={icon} size={18} color={colors.primary + '60'} />
+      <Text style={[styles.sectionTitle, color && { color }]}>{title}</Text>
+      <Ionicons name={icon} size={18} color={color || colors.primary + '60'} />
     </View>
   );
 }
@@ -173,18 +180,6 @@ function SettingField({ label, value, onChangeText, placeholder, icon, secureTex
         />
       </View>
     </View>
-  );
-}
-
-function DataAction({ icon, label, color, onPress, destructive }) {
-  return (
-    <TouchableOpacity style={styles.dataActionRow} onPress={onPress} activeOpacity={0.75}>
-      <View style={[styles.dataActionIcon, { backgroundColor: color + '15' }]}>
-        <Ionicons name={icon} size={20} color={color} />
-      </View>
-      <Text style={[styles.dataActionLabel, destructive && { color }]}>{label}</Text>
-      <Ionicons name="chevron-forward" size={18} color={destructive ? color + '60' : colors.onSurfaceVariant} />
-    </TouchableOpacity>
   );
 }
 
@@ -226,25 +221,16 @@ const styles = StyleSheet.create({
   currencyOptionActive: { backgroundColor: colors.primary + '10' },
   currencyOptionText: { fontSize: 14, color: colors.onSurface, fontWeight: '500' },
   currencyOptionTextActive: { color: colors.primary, fontWeight: '700' },
-  saveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: colors.primary,
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginTop: 20,
-    marginBottom: 4,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  saveBtnText: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  saveBtn: { backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginHorizontal: 20, marginBottom: 24, shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
+  saveBtnText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700' },
   dataActionRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
   dataActionIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   dataActionLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.onSurface },
   version: { textAlign: 'center', fontSize: 12, color: colors.outline, marginTop: 24 },
+  iconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary + '15' },
+  settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
+  langBtn: { paddingHorizontal: 12, paddingVertical: 6 },
+  langBtnActive: { backgroundColor: colors.primary },
+  langText: { fontSize: 12, fontWeight: '600', color: colors.onSurfaceVariant },
+  langTextActive: { color: colors.onPrimary },
 });

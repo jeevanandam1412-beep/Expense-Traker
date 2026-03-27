@@ -5,11 +5,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useApp } from '../context/AppContext';
 
 const INCOME_SOURCES = ['Sales', 'Bank Transfer', 'Online Store', 'Cash', 'Other'];
 const EXPENSE_CATS = ['Rent', 'Stock', 'Salary', 'Utilities', 'Transport', 'Food', 'Other'];
 
 export default function AddModal({ visible, onClose, onSave, type, currency = 'â‚¹', initialData = null }) {
+  const { t } = useApp();
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -67,7 +69,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
   };
 
   const isEdit = !!initialData;
-  const titles = { income: isEdit ? 'Edit Income' : 'Add Income', expense: isEdit ? 'Edit Expense' : 'Add Expense', borrowed: isEdit ? 'Edit Borrowed' : 'Add Borrowed' };
+  const titles = { income: isEdit ? t('edit_income') : t('add_income'), expense: isEdit ? t('edit_expense') : t('add_expense'), borrowed: isEdit ? t('edit_borrowed') : t('add_borrowed') };
   const accentColor = type === 'income' ? colors.tertiary : type === 'expense' ? colors.secondary : colors.orange;
 
   return (
@@ -137,7 +139,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
             {/* CATEGORY / SOURCE */}
             {type === 'income' && (
               <>
-                <Text style={styles.label}>SOURCE</Text>
+                <Text style={styles.label}>{t('title_source')}</Text>
                 <View style={styles.chipRow}>
                   {INCOME_SOURCES.map(s => (
                     <TouchableOpacity
@@ -153,7 +155,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
             )}
             {type === 'expense' && (
               <>
-                <Text style={styles.label}>CATEGORY</Text>
+                <Text style={styles.label}>{t('category')}</Text>
                 <View style={styles.chipRow}>
                   {EXPENSE_CATS.map(c => (
                     <TouchableOpacity
@@ -168,17 +170,33 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
               </>
             )}
 
+            {/* DESCRIPTION */}
+            <View style={{ marginTop: 14 }}>
+              <Text style={styles.label}>{t('description_optional')}</Text>
+              <TextInput
+                style={[styles.input, styles.textarea]}
+                value={description}
+                onChangeText={setDescription}
+                placeholder="..."
+                placeholderTextColor={colors.outline}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
             {/* NOTES */}
-            <Text style={styles.label}>NOTES (optional)</Text>
-            <TextInput
-              style={[styles.input, styles.textarea]}
-              value={notes}
-              onChangeText={setNotes}
-              placeholder="Additional details..."
-              placeholderTextColor={colors.outline}
-              multiline
-              numberOfLines={3}
-            />
+            <View style={{ marginTop: 14 }}>
+              <Text style={styles.label}>{t('description')}</Text>
+              <TextInput
+                style={[styles.input, styles.textarea]}
+                value={notes}
+                onChangeText={setNotes}
+                placeholder="..."
+                placeholderTextColor={colors.outline}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
 
             <TouchableOpacity
               style={[styles.saveBtn, { backgroundColor: accentColor }]}

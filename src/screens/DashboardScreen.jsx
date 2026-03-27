@@ -12,7 +12,7 @@ import TransactionCard from '../components/TransactionCard';
 import AddModal from '../components/AddModal';
 
 export default function DashboardScreen({ navigation }) {
-  const { state, actions } = useApp();
+  const { state, actions, t } = useApp();
   const { income, expenses, borrowed, settings } = state;
   const currency = settings?.currency || '₹';
 
@@ -73,7 +73,7 @@ export default function DashboardScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
-      <Header title={settings?.storeName || 'Store Ledger'} subtitle="Good Morning" />
+      <Header title={settings?.storeName || t('store_name')} subtitle={t('good_morning')} />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
@@ -81,54 +81,53 @@ export default function DashboardScreen({ navigation }) {
       >
         {/* Summary Cards */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardsRow} contentContainerStyle={{ gap: 12, paddingRight: 20 }}>
-          <SummaryCard label="Total Income" value={`${currency}${fmt(totals.totalIncome)}`} color={colors.tertiary} icon="trending-up" />
-          <SummaryCard label="Total Expense" value={`${currency}${fmt(totals.totalExpense)}`} color={colors.secondary} icon="trending-down" />
-          <SummaryCard label="Net Profit" value={`${currency}${fmt(totals.profit)}`} color={colors.primary} icon="analytics" accent />
-          <SummaryCard label="Borrowed" value={`${currency}${fmt(totals.totalBorrowed)}`} color={colors.orange} icon="people" />
-          <SummaryCard label="Lent" value={`${currency}${fmt(totals.totalLent)}`} color="#8B5CF6" icon="arrow-up-circle" />
+          <SummaryCard label={t('total_income')} value={`${currency}${fmt(totals.totalIncome)}`} color={colors.tertiary} icon="trending-up" />
+          <SummaryCard label={t('total_expense')} value={`${currency}${fmt(totals.totalExpense)}`} color={colors.secondary} icon="trending-down" />
+          <SummaryCard label={t('net_profit')} value={`${currency}${fmt(totals.profit)}`} color={colors.primary} icon="analytics" accent />
+          <SummaryCard label={t('total_borrowed')} value={`${currency}${fmt(totals.totalBorrowed)}`} color={colors.orange} icon="people" />
+          <SummaryCard label={t('type_lent')} value={`${currency}${fmt(totals.totalLent)}`} color="#8B5CF6" icon="arrow-up-circle" />
         </ScrollView>
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Add</Text>
+          <Text style={styles.sectionTitle}>{t('quick_add')}</Text>
           <View style={styles.quickActions}>
-            <QuickAction label="Income" icon="add-circle" color={colors.tertiary} onPress={() => { setEditItem(null); setModalType('income'); }} />
-            <QuickAction label="Expense" icon="remove-circle" color={colors.secondary} onPress={() => { setEditItem(null); setModalType('expense'); }} />
-            <QuickAction label="Borrowed" icon="people" color={colors.orange} onPress={() => { setEditItem(null); setModalType('borrowed'); }} />
+            <QuickAction label={t('income')} icon="add-circle" color={colors.tertiary} onPress={() => { setEditItem(null); setModalType('income'); }} />
+            <QuickAction label={t('expenses')} icon="remove-circle" color={colors.secondary} onPress={() => { setEditItem(null); setModalType('expense'); }} />
+            <QuickAction label={t('borrowed')} icon="people" color={colors.orange} onPress={() => { setEditItem(null); setModalType('borrowed'); }} />
           </View>
         </View>
 
         {/* Weekly Bar Chart */}
         <View style={styles.section}>
           <View style={styles.chartHeader}>
-            <Text style={styles.sectionTitle}>Weekly Flow</Text>
-            <Text style={styles.chartSub}>LAST 7 DAYS</Text>
+            <Text style={styles.sectionTitle}>{t('cash_flow_analysis')}</Text>
+            <Text style={styles.chartSub}>{t('last_7_days')}</Text>
           </View>
-          <WeeklyChart income={income} expenses={expenses} />
+          <WeeklyChart income={income} expenses={expenses} t={t} />
         </View>
 
         {/* Recent Transactions */}
         <View style={styles.section}>
           <View style={styles.row}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <Text style={styles.sectionTitle}>{t('recent_transactions')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Income')}>
-              <Text style={styles.viewAll}>View All</Text>
+              <Text style={styles.viewAll}>{t('view_all')}</Text>
             </TouchableOpacity>
           </View>
           {recentTransactions.length === 0 ? (
             <View style={styles.empty}>
               <Ionicons name="receipt-outline" size={40} color={colors.outline} />
-              <Text style={styles.emptyText}>No transactions yet</Text>
-              <Text style={styles.emptySubText}>Tap Quick Add to get started</Text>
+              <Text style={styles.emptyText}>{t('no_transactions_yet')}</Text>
             </View>
           ) : (
-            recentTransactions.map(t => (
+            recentTransactions.map(tx => (
               <TransactionCard 
-                key={t.id} 
-                item={t} 
-                type={t.type} 
+                key={tx.id} 
+                item={tx} 
+                type={tx.type} 
                 currency={currency} 
-                onDelete={() => handleDelete(t)}
+                onDelete={() => handleDelete(tx)}
                 onEdit={handleEdit}
               />
             ))
@@ -170,7 +169,7 @@ function QuickAction({ label, icon, color, onPress }) {
   );
 }
 
-function WeeklyChart({ income, expenses }) {
+function WeeklyChart({ income, expenses, t }) {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const now = new Date();
   const maxH = 80;
@@ -203,8 +202,8 @@ function WeeklyChart({ income, expenses }) {
         ))}
       </View>
       <View style={styles.legend}>
-        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.tertiary }]} /><Text style={styles.legendText}>Income</Text></View>
-        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.secondary }]} /><Text style={styles.legendText}>Expense</Text></View>
+        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.tertiary }]} /><Text style={styles.legendText}>{t('income')}</Text></View>
+        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.secondary }]} /><Text style={styles.legendText}>{t('expenses')}</Text></View>
       </View>
     </View>
   );

@@ -39,6 +39,7 @@ function TabBarIcon({ name, focused }) {
 }
 
 export default function AppNavigator() {
+  const { t } = useApp();
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -51,32 +52,32 @@ export default function AppNavigator() {
         <Tab.Screen
           name="Dashboard"
           component={DashboardScreen}
-          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Dashboard" focused={focused} /> }}
+          options={{ tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />, tabBarLabel: t('dashboard') }}
         />
         <Tab.Screen
           name="Income"
           component={IncomeScreen}
-          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Income" focused={focused} /> }}
+          options={{ tabBarIcon: ({ color, size }) => <Ionicons name="arrow-down-circle-outline" size={size} color={color} />, tabBarLabel: t('income') }}
         />
         <Tab.Screen
           name="Borrowed"
           component={BorrowedLentScreen}
-          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Borrowed" focused={focused} /> }}
+          options={{ tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} />, tabBarLabel: t('borrowed') }}
         />
         <Tab.Screen
           name="Expenses"
           component={ExpenseScreen}
-          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Expenses" focused={focused} /> }}
+          options={{ tabBarIcon: ({ color, size }) => <Ionicons name="arrow-up-circle-outline" size={size} color={color} />, tabBarLabel: t('expenses') }}
         />
         <Tab.Screen
           name="Reports"
           component={ReportsScreen}
-          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Reports" focused={focused} /> }}
+          options={{ tabBarIcon: ({ color, size }) => <Ionicons name="pie-chart-outline" size={size} color={color} />, tabBarLabel: t('reports') }}
         />
         <Tab.Screen
           name="Settings"
           component={SettingsScreen}
-          options={{ tabBarIcon: ({ focused }) => <TabBarIcon name="Settings" focused={focused} /> }}
+          options={{ tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />, tabBarLabel: t('settings') }}
         />
       </Tab.Navigator>
     </NavigationContainer>
