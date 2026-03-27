@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, SectionList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
-import { colors } from '../theme/colors';
 import Header from '../components/Header';
 import TransactionCard from '../components/TransactionCard';
 import AddModal from '../components/AddModal';
@@ -22,9 +21,10 @@ function inFilter(dateStr, filter) {
 }
 
 export default function ExpenseScreen() {
-  const { state, actions } = useApp();
+  const { state, actions, t, colors } = useApp();
   const { expenses, settings } = state;
   const currency = settings?.currency || '₹';
+  const styles = getStyles(colors);
 
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
@@ -53,9 +53,9 @@ export default function ExpenseScreen() {
   }, [filtered]);
 
   const handleDelete = (id) => {
-    Alert.alert('Delete Entry', 'Remove this expense record?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => actions.deleteExpense(id) },
+    Alert.alert(t('delete'), t('delete_confirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('delete'), style: 'destructive', onPress: () => actions.deleteExpense(id) },
     ]);
   };
 
@@ -85,11 +85,11 @@ export default function ExpenseScreen() {
 
   return (
     <View style={styles.root}>
-      <Header title="Expenses" />
+      <Header title={t('expenses')} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Total Banner */}
         <View style={styles.totalBanner}>
-          <Text style={styles.totalLabel}>TOTAL EXPENSES ({filter})</Text>
+          <Text style={styles.totalLabel}>{t('total_expense')} ({t(filter.toLowerCase().replace(' ', '_'))})</Text>
           <Text style={styles.totalValue}>{currency}{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
         </View>
 
@@ -110,7 +110,7 @@ export default function ExpenseScreen() {
           <Ionicons name="search-outline" size={18} color={colors.outline} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search expenses..."
+            placeholder={t('search_expense')}
             placeholderTextColor={colors.outline}
             value={search}
             onChangeText={setSearch}
@@ -135,8 +135,8 @@ export default function ExpenseScreen() {
         {Object.keys(grouped).length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="trending-down-outline" size={48} color={colors.outline} />
-            <Text style={styles.emptyText}>No expenses yet</Text>
-            <Text style={styles.emptySubText}>Tap + to add an expense</Text>
+            <Text style={styles.emptyText}>{t('no_expenses')}</Text>
+            <Text style={styles.emptySubText}>{t('quick_add')}</Text>
           </View>
         ) : (
           Object.entries(grouped).map(([catLabel, items]) => {
@@ -148,7 +148,7 @@ export default function ExpenseScreen() {
                     <View style={[styles.dot, { backgroundColor: colors.primary }]} />
                     <Text style={styles.groupLabel}>{catLabel}</Text>
                   </View>
-                  <Text style={styles.groupTotal}>Total: {currency}{catTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
+                  <Text style={styles.groupTotal}>{t('total')}: {currency}{catTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
                 </View>
                 {items.map(item => (
                   <TransactionCard
@@ -183,71 +183,71 @@ export default function ExpenseScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const getStyles = (theme) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.background },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 120 },
   totalBanner: {
-    backgroundColor: colors.secondary + '15',
+    backgroundColor: theme.secondary + '15',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
-    borderLeftColor: colors.secondary,
+    borderLeftColor: theme.secondary,
   },
-  totalLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: colors.secondary, marginBottom: 4 },
-  totalValue: { fontSize: 26, fontWeight: '800', color: colors.secondary },
+  totalLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: theme.secondary, marginBottom: 4 },
+  totalValue: { fontSize: 26, fontWeight: '800', color: theme.secondary },
   categoryRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
   catCard: {
     flex: 1,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: theme.surfaceContainerLowest,
     borderRadius: 14,
     padding: 12,
     alignItems: 'center',
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
-  catLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, color: colors.outline, marginBottom: 4 },
-  catValue: { fontSize: 16, fontWeight: '800', color: colors.onSurface },
+  catLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, color: theme.outline, marginBottom: 4 },
+  catValue: { fontSize: 16, fontWeight: '800', color: theme.onSurface },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: theme.surfaceContainerLow,
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 10,
     marginBottom: 12,
   },
-  searchInput: { flex: 1, fontSize: 15, color: colors.onSurface },
+  searchInput: { flex: 1, fontSize: 15, color: theme.onSurface },
   filterRow: { marginBottom: 16, marginHorizontal: -20, paddingLeft: 20 },
-  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerHigh },
-  chipActive: { backgroundColor: colors.primary },
-  chipText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },
-  chipTextActive: { color: '#fff' },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: theme.surfaceContainerHigh },
+  chipActive: { backgroundColor: theme.primary },
+  chipText: { fontSize: 13, fontWeight: '600', color: theme.onSurfaceVariant },
+  chipTextActive: { color: theme.onPrimary },
   group: { marginBottom: 20 },
-  groupHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.outlineVariant + '40', paddingBottom: 8, marginBottom: 10 },
+  groupHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: theme.outlineVariant + '40', paddingBottom: 8, marginBottom: 10 },
   groupLeftRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  groupLabel: { fontSize: 15, fontWeight: '800', color: colors.onSurface },
-  groupTotal: { fontSize: 13, fontWeight: '700', color: colors.secondary },
+  groupLabel: { fontSize: 15, fontWeight: '800', color: theme.onSurface },
+  groupTotal: { fontSize: 13, fontWeight: '700', color: theme.secondary },
   empty: { alignItems: 'center', paddingVertical: 60, gap: 8 },
-  emptyText: { fontSize: 16, fontWeight: '700', color: colors.onSurfaceVariant },
-  emptySubText: { fontSize: 13, color: colors.outline },
+  emptyText: { fontSize: 16, fontWeight: '700', color: theme.onSurfaceVariant },
+  emptySubText: { fontSize: 13, color: theme.outline },
   fab: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 108 : 88,
+    bottom: Platform?.OS === 'ios' ? 108 : 88,
     right: 20,
     width: 60,
     height: 60,
     borderRadius: 20,
-    backgroundColor: colors.secondary,
+    backgroundColor: theme.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.secondary,
+    shadowColor: theme.secondary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,

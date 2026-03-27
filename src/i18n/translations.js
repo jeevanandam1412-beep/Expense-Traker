@@ -11,6 +11,7 @@ export const translations = {
     store_profile: 'Store Profile', store_name: 'Store Name', owner_name: 'Owner Name', preferences: 'Preferences', currency: 'Currency', language: 'Language',
     email_config: 'Email Config', emailjs_service_id: 'EmailJS Service ID', template_id: 'Template ID', public_key: 'Public Key', private_key: 'Private Key',
     data_management: 'Data Management', clear_all_data: 'Clear All Data', clear_warning: 'Are you sure you want to permanently delete all data? This cannot be undone.', save_settings: 'Save Settings', saved: 'Saved successfully!',
+    dark_mode: 'Dark Mode', adjust_low_light: 'Adjust for low light',
     today: 'Today', yesterday: 'Yesterday', this_week: 'This Week', this_month: 'This Month', last_7_days: 'Last 7 Days', last_month: 'Last Month', all: 'All',
     cancel: 'Cancel', delete: 'Delete', edit: 'Edit', save: 'Save', amount: 'Amount', title_source: 'Title / Source', person_name: 'Person Name', description_optional: 'Description (optional)', category: 'Category', date: 'Date', borrow_type: 'Type', type_borrowed: 'Borrowed (You got)', type_lent: 'Lent (You gave)', description: 'Description', type: 'Type', delete_confirm: 'Are you sure you want to delete this?', error: 'Error', success: 'Success',
   },
@@ -26,6 +27,7 @@ export const translations = {
     store_profile: 'கடை சுயவிவரம்', store_name: 'கடையின் பெயர்', owner_name: 'உரிமையாளர் பெயர்', preferences: 'விருப்பங்கள்', currency: 'நாணயம்', language: 'மொழி',
     email_config: 'மின்னஞ்சல் அமைப்பு', emailjs_service_id: 'EmailJS Service ID', template_id: 'Template ID', public_key: 'Public Key', private_key: 'Private Key',
     data_management: 'தரவு மேலாண்மை', clear_all_data: 'அனைத்து தரவையும் நீக்கு', clear_warning: 'நிச்சயமாக அனைத்து தரவையும் நீக்க வேண்டுமா?', save_settings: 'அமைப்புகளை சேமி', saved: 'வெற்றிகரமாக சேமிக்கப்பட்டது!',
+    dark_mode: 'இருண்ட பயன்முறை', adjust_low_light: 'குறைந்த வெளிச்சத்திற்கு ஏற்ப',
     today: 'இன்று', yesterday: 'நேற்று', this_week: 'இந்த வாரம்', this_month: 'இந்த மாதம்', last_7_days: 'கடந்த 7 நாட்கள்', last_month: 'கடந்த மாதம்', all: 'அனைத்தும்',
     cancel: 'ரத்து செய்', delete: 'நீக்கு', edit: 'திருத்து', save: 'சேமி', amount: 'தொகை', title_source: 'தலைப்பு / ஆதாரம்', person_name: 'நபர் பெயர்', description_optional: 'விளக்கம் (விருப்பம்)', category: 'வகை', date: 'தேதி', borrow_type: 'வகை', type_borrowed: 'கடன் வாங்கியது', type_lent: 'கடன் கொடுத்தது', description: 'விளக்கம்', type: 'வகை', delete_confirm: 'இதை நீக்க நீங்கள் நிச்சயமாக விரும்புகிறீர்களா?', error: 'பிழை', success: 'வெற்றி',
   }

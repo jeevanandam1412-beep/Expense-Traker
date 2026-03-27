@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { getIncome, getExpenses, getBorrowed, getSettings, addIncome, updateIncome, deleteIncome, addExpense, updateExpense, deleteExpense, addBorrowed, updateBorrowed, deleteBorrowed, saveSettings, clearAllData } from '../storage';
 import { translate } from '../i18n/translations';
+import { themes } from '../theme/colors';
 
 const AppContext = createContext(null);
 
@@ -108,8 +109,10 @@ export function AppProvider({ children }) {
     },
   };
 
+  const currentColors = themes[state.settings?.darkMode ? 'dark' : 'light'];
+
   return (
-    <AppContext.Provider value={{ state, actions }}>
+    <AppContext.Provider value={{ state, actions, colors: currentColors }}>
       {children}
     </AppContext.Provider>
   );

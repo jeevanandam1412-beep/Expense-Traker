@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
-import { useApp } from '../context/AppContext'; // Assuming useApp is from a context file
+import { useApp } from '../context/AppContext';
 
 export default function TransactionCard({ item, type, currency, onDelete, onEdit }) {
-  const { t } = useApp();
+  const { t, colors } = useApp();
+  const styles = getStyles(colors);
   const [showMenu, setShowMenu] = useState(false);
   const isIncome = type === 'income';
   const isExpense = type === 'expense';
@@ -78,17 +78,17 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: theme.surfaceContainerLowest,
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
     borderRightWidth: 4,
     gap: 12,
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -108,11 +108,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.onSurface,
+    color: theme.onSurface,
   },
   sub: {
     fontSize: 11,
-    color: colors.onSurfaceVariant,
+    color: theme.onSurfaceVariant,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuBox: {
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: theme.surfaceContainerLowest,
     borderRadius: 14,
     width: 200,
     shadowColor: '#000',
@@ -150,11 +150,11 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.onSurface,
+    color: theme.onSurface,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: colors.outlineVariant + '30',
+    backgroundColor: theme.outlineVariant + '30',
   },
   amount: {
     fontSize: 15,
@@ -176,10 +176,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   badgePaid: {
-    backgroundColor: colors.tertiaryFixed,
+    backgroundColor: theme.tertiaryFixed,
   },
   badgePaidText: {
-    color: colors.tertiary,
+    color: theme.tertiary,
     fontSize: 9,
     fontWeight: '700',
     textTransform: 'uppercase',

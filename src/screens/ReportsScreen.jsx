@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { useApp } from '../context/AppContext';
-import { colors } from '../theme/colors';
 import Header from '../components/Header';
 
 const FILTERS = ['Today', 'Yesterday', 'Last 7 Days', 'Last Month', 'All'];
@@ -31,9 +30,10 @@ function inFilter(dateStr, filter) {
 }
 
 export default function ReportsScreen() {
-  const { state, t } = useApp();
+  const { state, t, colors } = useApp();
   const { income, expenses, borrowed, settings } = state;
   const currency = settings?.currency || '₹';
+  const styles = getStyles(colors);
 
   const [filter, setFilter] = useState('All');
 
@@ -146,7 +146,7 @@ export default function ReportsScreen() {
       const { uri } = await Print.printToFileAsync({ html: generateHtml() });
       await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
     } catch (e) {
-      Alert.alert('Error', 'Failed to generate PDF.');
+      Alert.alert(t('error'), t('failed_to_save_pdf') || 'Failed to generate PDF.');
     }
   };
 
@@ -178,12 +178,12 @@ export default function ReportsScreen() {
         });
         
         if (res.ok) {
-           Alert.alert('Success', 'Report successfully sent via EmailJS!');
+           Alert.alert(t('success'), t('report_sent_emailjs') || 'Report successfully sent via EmailJS!');
            return;
         } else {
            const errText = await res.text();
            console.log('EmailJS Error:', errText);
-           Alert.alert('EmailJS Error', 'Failed to send via EmailJS. Falling back to default mail app.');
+           Alert.alert(t('error'), t('failed_to_send_emailjs') || 'Failed to send via EmailJS. Falling back to default mail app.');
         }
       } catch (e) {
         console.log('EmailJS Network Error', e);
@@ -294,12 +294,12 @@ export default function ReportsScreen() {
             data.allTx.map((tx, idx) => (
               <View key={tx.id} style={[styles.tableRow, idx % 2 === 0 && { backgroundColor: colors.surfaceContainerLow + '60' }]}>
                 <View style={{ flex: 2 }}>
-                  <Text style={styles.tdMain} numberOfLines={1}>{tx.description || tx.source || 'Transaction'}</Text>
+                  <Text style={styles.tdMain} numberOfLines={1}>{tx.description || tx.source || t('transaction')}</Text>
                   <Text style={styles.tdSub}>{new Date(tx.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Text>
                 </View>
                 <View style={[styles.typeBadge, { backgroundColor: tx.type === 'income' ? colors.tertiary + '20' : colors.secondary + '20' }]}>
                   <Text style={[styles.typeBadgeText, { color: tx.type === 'income' ? colors.tertiary : colors.secondary }]}>
-                    {tx.type === 'income' ? 'IN' : 'EX'}
+                    {tx.type === 'income' ? t('in_short') || 'IN' : t('ex_short') || 'EX'}
                   </Text>
                 </View>
                 <Text style={[styles.tdAmount, { color: tx.type === 'income' ? colors.tertiary : colors.secondary }]}>
@@ -323,70 +323,70 @@ function StatCard({ label, value, color }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const getStyles = (theme) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.background },
   scroll: { flex: 1 },
   content: { paddingTop: 16, paddingBottom: 120 },
   filterRow: { marginBottom: 16, paddingHorizontal: 20 },
   actionRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 20, marginBottom: 16 },
   actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12 },
   actionBtnText: { fontSize: 13, fontWeight: '700' },
-  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerLow },
-  chipActive: { backgroundColor: colors.primaryContainer },
-  chipText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },
-  chipTextActive: { color: '#fff' },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: theme.surfaceContainerLow },
+  chipActive: { backgroundColor: theme.primaryContainer },
+  chipText: { fontSize: 13, fontWeight: '600', color: theme.onSurfaceVariant },
+  chipTextActive: { color: theme.onPrimaryContainer || '#fff' },
   summaryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 20, marginBottom: 16 },
   statCard: {
     width: '47%',
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: theme.surfaceContainerLowest,
     borderRadius: 16,
     padding: 16,
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
     elevation: 3,
   },
-  statLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant, marginBottom: 6 },
+  statLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: theme.onSurfaceVariant, marginBottom: 6 },
   statValue: { fontSize: 20, fontWeight: '800' },
   chartCard: {
     marginHorizontal: 20,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: theme.surfaceContainerLowest,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.06,
     shadowRadius: 16,
     elevation: 4,
   },
   chartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  cardTitle: { fontSize: 16, fontWeight: '800', color: colors.onSurface },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: theme.onSurface },
   legend: { flexDirection: 'row', gap: 12 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: 11, color: colors.onSurfaceVariant },
+  legendText: { fontSize: 11, color: theme.onSurfaceVariant },
   chartBars: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 110, paddingHorizontal: 4 },
   barGroup: { flex: 1, alignItems: 'center', gap: 4 },
   barStack: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
   bar: { width: 10, borderRadius: 4 },
-  barInc: { backgroundColor: colors.tertiary },
-  barExp: { backgroundColor: colors.secondary },
-  barLabel: { fontSize: 9, color: colors.onSurfaceVariant, textTransform: 'uppercase', fontWeight: '600' },
+  barInc: { backgroundColor: theme.tertiary },
+  barExp: { backgroundColor: theme.secondary },
+  barLabel: { fontSize: 9, color: theme.onSurfaceVariant, textTransform: 'uppercase', fontWeight: '600' },
   catRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  catName: { fontSize: 13, fontWeight: '600', color: colors.onSurface },
-  catPct: { fontSize: 12, fontWeight: '600', color: colors.onSurfaceVariant },
-  progressBg: { height: 6, backgroundColor: colors.surfaceContainerHigh, borderRadius: 3, overflow: 'hidden' },
+  catName: { fontSize: 13, fontWeight: '600', color: theme.onSurface },
+  catPct: { fontSize: 12, fontWeight: '600', color: theme.onSurfaceVariant },
+  progressBg: { height: 6, backgroundColor: theme.surfaceContainerHigh, borderRadius: 3, overflow: 'hidden' },
   progressFg: { height: 6, borderRadius: 3 },
-  tableHeader: { flexDirection: 'row', backgroundColor: colors.surfaceContainerLow, paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center', gap: 8 },
-  th: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant },
-  tableRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer },
-  tdMain: { fontSize: 13, fontWeight: '600', color: colors.onSurface },
-  tdSub: { fontSize: 10, color: colors.onSurfaceVariant },
+  tableHeader: { flexDirection: 'row', backgroundColor: theme.surfaceContainerLow, paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center', gap: 8 },
+  th: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: theme.onSurfaceVariant },
+  tableRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 8, borderTopWidth: 1, borderTopColor: theme.surfaceContainer },
+  tdMain: { fontSize: 13, fontWeight: '600', color: theme.onSurface },
+  tdSub: { fontSize: 10, color: theme.onSurfaceVariant },
   typeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, minWidth: 30, alignItems: 'center' },
   typeBadgeText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
   tdAmount: { fontSize: 13, fontWeight: '800', textAlign: 'right', flex: 1.5 },
   empty: { alignItems: 'center', paddingVertical: 32, gap: 8 },
-  emptyText: { fontSize: 13, color: colors.onSurfaceVariant },
+  emptyText: { fontSize: 13, color: theme.onSurfaceVariant },
 });

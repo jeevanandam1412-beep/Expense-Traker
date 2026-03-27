@@ -4,14 +4,14 @@ import {
   StyleSheet, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 
 const INCOME_SOURCES = ['Sales', 'Bank Transfer', 'Online Store', 'Cash', 'Other'];
 const EXPENSE_CATS = ['Rent', 'Stock', 'Salary', 'Utilities', 'Transport', 'Food', 'Other'];
 
 export default function AddModal({ visible, onClose, onSave, type, currency = 'â‚¹', initialData = null }) {
-  const { t } = useApp();
+  const { t, colors } = useApp();
+  const styles = getStyles(colors);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -75,7 +75,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose} />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform?.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
         <View style={styles.sheet}>
           <View style={styles.handle} />
           <View style={styles.sheetHeader}>
@@ -87,7 +87,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* AMOUNT */}
-            <Text style={styles.label}>AMOUNT</Text>
+            <Text style={styles.label}>{t('amount').toUpperCase()}</Text>
             <View style={styles.amountRow}>
               <Text style={[styles.currencySign, { color: accentColor }]}>{currency}</Text>
               <TextInput
@@ -111,7 +111,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
                   placeholder="e.g. John Smith"
                   placeholderTextColor={colors.outline}
                 />
-                <Text style={styles.label}>DUE DATE (optional)</Text>
+                <Text style={styles.label}>{t('date').toUpperCase()} ({t('optional')})</Text>
                 <TextInput
                   style={styles.input}
                   value={dueDate}
@@ -125,7 +125,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
             {/* DESCRIPTION */}
             {(type === 'income' || type === 'expense') && (
               <>
-                <Text style={styles.label}>DESCRIPTION (optional)</Text>
+                <Text style={styles.label}>{t('description_optional').toUpperCase()}</Text>
                 <TextInput
                   style={styles.input}
                   value={description}
@@ -204,7 +204,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
               activeOpacity={0.85}
             >
               <Ionicons name="checkmark-circle" size={20} color="#fff" />
-              <Text style={styles.saveBtnText}>Save Transaction</Text>
+              <Text style={styles.saveBtnText}>{t('save')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -213,7 +213,7 @@ export default function AddModal({ visible, onClose, onSave, type, currency = 'â
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(24,28,32,0.4)',
@@ -223,12 +223,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.surface,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     paddingHorizontal: 24,
     paddingTop: 12,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    paddingBottom: Platform?.OS === 'ios' ? 40 : 24,
     maxHeight: '92%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -8 },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 5,
     borderRadius: 3,
-    backgroundColor: colors.outlineVariant,
+    backgroundColor: theme.outlineVariant,
     alignSelf: 'center',
     marginBottom: 16,
   },
@@ -253,20 +253,20 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: colors.onSurface,
+    color: theme.onSurface,
   },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.surfaceContainerHigh,
+    backgroundColor: theme.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
     fontSize: 10,
     fontWeight: '700',
-    color: colors.onSurfaceVariant,
+    color: theme.onSurfaceVariant,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 6,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   amountRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: theme.surfaceContainerLow,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 4,
@@ -289,16 +289,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 32,
     fontWeight: '800',
-    color: colors.onSurface,
+    color: theme.onSurface,
     paddingVertical: 12,
   },
   input: {
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: theme.surfaceContainerLow,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
-    color: colors.onSurface,
+    color: theme.onSurface,
   },
   textarea: {
     minHeight: 80,
@@ -313,16 +313,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: colors.surfaceContainerHigh,
+    backgroundColor: theme.surfaceContainerHigh,
   },
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.onSurfaceVariant,
+    color: theme.onSurfaceVariant,
   },
   toggleRow: {
     flexDirection: 'row',
-    backgroundColor: colors.surfaceContainerHigh,
+    backgroundColor: theme.surfaceContainerHigh,
     borderRadius: 999,
     padding: 4,
     gap: 4,
@@ -334,12 +334,12 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   toggleBtnActive: {
-    backgroundColor: colors.primaryContainer,
+    backgroundColor: theme.primaryContainer,
   },
   toggleText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.onSurfaceVariant,
+    color: theme.onSurfaceVariant,
   },
   toggleTextActive: {
     color: '#fff',
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 24,
     marginBottom: 8,
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 16,

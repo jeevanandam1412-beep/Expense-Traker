@@ -4,7 +4,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
-import { colors } from '../theme/colors';
 import Header from '../components/Header';
 
 const CURRENCIES = [
@@ -16,8 +15,9 @@ const CURRENCIES = [
 ];
 
 export default function SettingsScreen({ navigation }) {
-  const { state, actions, t } = useApp();
+  const { state, actions, t, colors } = useApp();
   const { settings } = state;
+  const styles = getStyles(colors);
 
   const [storeName, setStoreName] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -64,11 +64,11 @@ export default function SettingsScreen({ navigation }) {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* Profile */}
-        <SectionHeader title={t('store_profile')} icon="storefront-outline" />
+        <SectionHeader title={t('store_profile')} icon="storefront-outline" theme={colors} />
         <View style={styles.card}>
-          <SettingField label={t('store_name')} value={storeName} onChangeText={setStoreName} placeholder="..." icon="business-outline" />
-          <Divider />
-          <SettingField label={t('owner_name')} value={ownerName} onChangeText={setOwnerName} placeholder="..." icon="person-outline" />
+          <SettingField label={t('store_name')} value={storeName} onChangeText={setStoreName} placeholder="..." icon="business-outline" theme={colors} />
+          <Divider theme={colors} />
+          <SettingField label={t('owner_name')} value={ownerName} onChangeText={setOwnerName} placeholder="..." icon="person-outline" theme={colors} />
         </View>
 
         {/* Preferences */}
@@ -104,8 +104,8 @@ export default function SettingsScreen({ navigation }) {
             <View style={styles.switchInfo}>
               <Ionicons name="moon-outline" size={20} color={colors.primary} />
               <View>
-                <Text style={styles.switchLabel}>Dark Mode</Text>
-                <Text style={styles.switchSub}>Adjust for low light</Text>
+                <Text style={styles.switchLabel}>{t('dark_mode')}</Text>
+                <Text style={styles.switchSub}>{t('adjust_low_light')}</Text>
               </View>
             </View>
             <Switch
@@ -118,15 +118,15 @@ export default function SettingsScreen({ navigation }) {
         </View>
 
         {/* Email Config */}
-        <SectionHeader title={t('email_config')} icon="mail-outline" />
+        <SectionHeader title={t('email_config')} icon="mail-outline" theme={colors} />
         <View style={styles.card}>
-          <SettingField label={t('emailjs_service_id')} value={emailjsId} onChangeText={setEmailjsId} placeholder="service_xxx" icon="cloud-outline" secureTextEntry />
-          <Divider />
-          <SettingField label={t('template_id')} value={templateId} onChangeText={setTemplateId} placeholder="template_xxx" icon="document-outline" />
-          <Divider />
-          <SettingField label={t('public_key')} value={publicKey} onChangeText={setPublicKey} placeholder="xxxxxxxxxxxxxxx" icon="key-outline" secureTextEntry />
-          <Divider />
-          <SettingField label={t('private_key')} value={privateKey} onChangeText={setPrivateKey} placeholder="xxxxxxxxxxxxxxx" icon="lock-closed-outline" secureTextEntry />
+          <SettingField label={t('emailjs_service_id')} value={emailjsId} onChangeText={setEmailjsId} placeholder="service_xxx" icon="cloud-outline" secureTextEntry theme={colors} />
+          <Divider theme={colors} />
+          <SettingField label={t('template_id')} value={templateId} onChangeText={setTemplateId} placeholder="template_xxx" icon="document-outline" theme={colors} />
+          <Divider theme={colors} />
+          <SettingField label={t('public_key')} value={publicKey} onChangeText={setPublicKey} placeholder="xxxxxxxxxxxxxxx" icon="key-outline" secureTextEntry theme={colors} />
+          <Divider theme={colors} />
+          <SettingField label={t('private_key')} value={privateKey} onChangeText={setPrivateKey} placeholder="xxxxxxxxxxxxxxx" icon="lock-closed-outline" secureTextEntry theme={colors} />
         </View>
 
         {/* Save Button */}
@@ -135,7 +135,7 @@ export default function SettingsScreen({ navigation }) {
         </TouchableOpacity>
 
         {/* Data Management */}
-        <SectionHeader title={t('data_management')} icon="warning-outline" color={colors.error} />
+        <SectionHeader title={t('data_management')} icon="warning-outline" color={colors.error} theme={colors} />
         <View style={[styles.card, { borderColor: colors.error + '40', borderWidth: 1 }]}>
           <TouchableOpacity style={styles.settingRow} onPress={handleClear}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -153,19 +153,20 @@ export default function SettingsScreen({ navigation }) {
   );
 }
 
-function SectionHeader({ title, icon, color }) {
+function SectionHeader({ title, icon, color, theme }) {
   return (
-    <View style={styles.sectionHeader}>
-      <Text style={[styles.sectionTitle, color && { color }]}>{title}</Text>
-      <Ionicons name={icon} size={18} color={color || colors.primary + '60'} />
+    <View style={getStyles(theme).sectionHeader}>
+      <Text style={[getStyles(theme).sectionTitle, color && { color }]}>{title}</Text>
+      <Ionicons name={icon} size={18} color={color || theme.primary + '60'} />
     </View>
   );
 }
 
-function SettingField({ label, value, onChangeText, placeholder, icon, secureTextEntry }) {
+function SettingField({ label, value, onChangeText, placeholder, icon, secureTextEntry, theme }) {
+  const styles = getStyles(theme);
   return (
     <View style={styles.fieldRow}>
-      <Ionicons name={icon} size={20} color={colors.primary} />
+      <Ionicons name={icon} size={20} color={theme.primary} />
       <View style={styles.fieldInfo}>
         <Text style={styles.fieldLabel}>{label}</Text>
         <TextInput
@@ -173,7 +174,7 @@ function SettingField({ label, value, onChangeText, placeholder, icon, secureTex
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={colors.outline}
+          placeholderTextColor={theme.outline}
           secureTextEntry={secureTextEntry}
           autoCapitalize="none"
           autoCorrect={false}
@@ -183,21 +184,21 @@ function SettingField({ label, value, onChangeText, placeholder, icon, secureTex
   );
 }
 
-function Divider() {
-  return <View style={styles.divider} />;
+function Divider({ theme }) {
+  return <View style={getStyles(theme).divider} />;
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const getStyles = (theme) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.background },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 120 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, marginTop: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: colors.onSurface },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: theme.onSurface },
   card: {
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: theme.surfaceContainerLow,
     borderRadius: 20,
     overflow: 'hidden',
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -205,32 +206,32 @@ const styles = StyleSheet.create({
   },
   fieldRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
   fieldInfo: { flex: 1, gap: 2 },
-  fieldLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant },
-  fieldInput: { fontSize: 15, color: colors.onSurface, paddingVertical: 0 },
-  divider: { height: 1, backgroundColor: colors.outlineVariant + '30', marginHorizontal: 16 },
+  fieldLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: theme.onSurfaceVariant },
+  fieldInput: { fontSize: 15, color: theme.onSurface, paddingVertical: 0 },
+  divider: { height: 1, backgroundColor: theme.outlineVariant + '30', marginHorizontal: 16 },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   switchInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  switchLabel: { fontSize: 15, fontWeight: '600', color: colors.onSurface },
-  switchSub: { fontSize: 12, color: colors.onSurfaceVariant },
+  switchLabel: { fontSize: 15, fontWeight: '600', color: theme.onSurface },
+  switchSub: { fontSize: 12, color: theme.onSurfaceVariant },
   selectRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
   selectInfo: { flex: 1 },
-  settingLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant },
-  settingValue: { fontSize: 15, color: colors.onSurface, fontWeight: '600', marginTop: 2 },
-  currencyPicker: { borderTopWidth: 1, borderTopColor: colors.outlineVariant + '30' },
+  settingLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: theme.onSurfaceVariant },
+  settingValue: { fontSize: 15, color: theme.onSurface, fontWeight: '600', marginTop: 2 },
+  currencyPicker: { borderTopWidth: 1, borderTopColor: theme.outlineVariant + '30' },
   currencyOption: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingVertical: 12 },
-  currencyOptionActive: { backgroundColor: colors.primary + '10' },
-  currencyOptionText: { fontSize: 14, color: colors.onSurface, fontWeight: '500' },
-  currencyOptionTextActive: { color: colors.primary, fontWeight: '700' },
-  saveBtn: { backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginHorizontal: 20, marginBottom: 24, shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
-  saveBtnText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700' },
+  currencyOptionActive: { backgroundColor: theme.primary + '10' },
+  currencyOptionText: { fontSize: 14, color: theme.onSurface, fontWeight: '500' },
+  currencyOptionTextActive: { color: theme.primary, fontWeight: '700' },
+  saveBtn: { backgroundColor: theme.primary, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginHorizontal: 20, marginBottom: 24, shadowColor: theme.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
+  saveBtnText: { color: theme.onPrimary, fontSize: 15, fontWeight: '700' },
   dataActionRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
   dataActionIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  dataActionLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.onSurface },
-  version: { textAlign: 'center', fontSize: 12, color: colors.outline, marginTop: 24 },
-  iconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary + '15' },
+  dataActionLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: theme.onSurface },
+  version: { textAlign: 'center', fontSize: 12, color: theme.outline, marginTop: 24 },
+  iconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.primary + '15' },
   settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   langBtn: { paddingHorizontal: 12, paddingVertical: 6 },
-  langBtnActive: { backgroundColor: colors.primary },
-  langText: { fontSize: 12, fontWeight: '600', color: colors.onSurfaceVariant },
-  langTextActive: { color: colors.onPrimary },
+  langBtnActive: { backgroundColor: theme.primary },
+  langText: { fontSize: 12, fontWeight: '600', color: theme.onSurfaceVariant },
+  langTextActive: { color: theme.onPrimary },
 });

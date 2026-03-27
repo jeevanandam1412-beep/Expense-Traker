@@ -2,16 +2,18 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 
 export default function Header({ title, rightIcon, onRightPress, subtitle }) {
-  const { state } = useApp();
-  const storeName = state.settings?.storeName || 'My Store';
+  const { state, colors, t } = useApp();
+  const storeName = state.settings?.storeName || t('store_name');
+  const darkMode = state.settings?.darkMode;
+
+  const styles = getStyles(colors);
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={colors.gradientStart} />
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} backgroundColor={colors.background} />
       <LinearGradient
         colors={[colors.gradientStart, colors.gradientEnd]}
         start={{ x: 0, y: 0 }}
@@ -39,19 +41,17 @@ export default function Header({ title, rightIcon, onRightPress, subtitle }) {
   );
 }
 
-const HEADER_TOP = Platform.OS === 'ios' ? 54 : StatusBar.currentHeight + 12;
-
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: HEADER_TOP,
+    paddingTop: Platform.OS === 'ios' ? 54 : (StatusBar.currentHeight || 0) + 12,
     paddingBottom: 24,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.2,
     shadowRadius: 24,

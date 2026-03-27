@@ -4,15 +4,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
-import { colors } from '../theme/colors';
 import Header from '../components/Header';
 import TransactionCard from '../components/TransactionCard';
 import AddModal from '../components/AddModal';
 
 export default function BorrowedScreen() {
-  const { state, actions } = useApp();
+  const { state, actions, t, colors } = useApp();
   const { borrowed, settings } = state;
   const currency = settings?.currency || '₹';
+  const styles = getStyles(colors);
 
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -27,9 +27,9 @@ export default function BorrowedScreen() {
   const fmt = (n) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const handleDelete = (id) => {
-    Alert.alert('Delete Entry', 'Remove this borrowed record?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => actions.deleteBorrowed(id) },
+    Alert.alert(t('delete'), t('delete_confirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('delete'), style: 'destructive', onPress: () => actions.deleteBorrowed(id) },
     ]);
   };
 
@@ -47,21 +47,21 @@ export default function BorrowedScreen() {
   };
 
   const handleMarkPaid = (id) => {
-    Alert.alert('Mark as Paid', 'Mark this entry as settled?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Mark Paid', onPress: () => actions.markBorrowedPaid(id) },
+    Alert.alert(t('mark_settled'), t('mark_settled_confirm') || 'Mark this entry as settled?', [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('settled'), onPress: () => actions.markBorrowedPaid(id) },
     ]);
   };
 
   return (
     <View style={styles.root}>
-      <Header title="Borrowed" />
+      <Header title={t('borrowed')} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* Net Balance Card */}
         <View style={styles.balanceCard}>
           <View style={styles.balanceMain}>
-            <Text style={styles.balanceLabel}>TOTAL BORROWED</Text>
+            <Text style={styles.balanceLabel}>{t('total_borrowed')}</Text>
             <Text style={[styles.balanceValue, { color: colors.secondary }]}>
               {currency}{fmt(totals.totalBorrowed)}
             </Text>
@@ -72,8 +72,8 @@ export default function BorrowedScreen() {
         {filtered.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="people-outline" size={48} color={colors.outline} />
-            <Text style={styles.emptyText}>No borrowed entries</Text>
-            <Text style={styles.emptySubText}>Tap + to add a record</Text>
+            <Text style={styles.emptyText}>{t('no_borrowed')}</Text>
+            <Text style={styles.emptySubText}>{t('quick_add')}</Text>
           </View>
         ) : (
           filtered.map(item => (
@@ -91,7 +91,7 @@ export default function BorrowedScreen() {
                   onPress={() => handleMarkPaid(item.id)}
                 >
                   <Ionicons name="checkmark-circle-outline" size={14} color={colors.tertiary} />
-                  <Text style={styles.markPaidText}>Mark as Settled</Text>
+                  <Text style={styles.markPaidText}>{t('mark_settled')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -116,32 +116,32 @@ export default function BorrowedScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const getStyles = (theme) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.background },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 120 },
   balanceCard: {
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: theme.surfaceContainerLow,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
     gap: 16,
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.06,
     shadowRadius: 16,
     elevation: 4,
   },
   balanceMain: { gap: 4 },
-  balanceLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: colors.onSurfaceVariant },
+  balanceLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: theme.onSurfaceVariant },
   balanceValue: { fontSize: 40, fontWeight: '800', letterSpacing: -1 },
   balanceRow: { flexDirection: 'row', gap: 12 },
-  balanceSub: { flex: 1, backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 14 },
-  balanceSubLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant, marginBottom: 4 },
+  balanceSub: { flex: 1, backgroundColor: theme.surfaceContainerLowest, borderRadius: 12, padding: 14 },
+  balanceSubLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: theme.onSurfaceVariant, marginBottom: 4 },
   balanceSubValue: { fontSize: 18, fontWeight: '800' },
   empty: { alignItems: 'center', paddingVertical: 60, gap: 8 },
-  emptyText: { fontSize: 16, fontWeight: '700', color: colors.onSurfaceVariant },
-  emptySubText: { fontSize: 13, color: colors.outline },
+  emptyText: { fontSize: 16, fontWeight: '700', color: theme.onSurfaceVariant },
+  emptySubText: { fontSize: 13, color: theme.outline },
   markPaidBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -152,18 +152,18 @@ const styles = StyleSheet.create({
     marginTop: -6,
     marginBottom: 6,
   },
-  markPaidText: { fontSize: 12, fontWeight: '700', color: colors.tertiary },
+  markPaidText: { fontSize: 12, fontWeight: '700', color: theme.tertiary },
   fab: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 108 : 88,
+    bottom: Platform?.OS === 'ios' ? 108 : 88,
     right: 20,
     width: 60,
     height: 60,
     borderRadius: 20,
-    backgroundColor: colors.orange,
+    backgroundColor: theme.orange,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.orange,
+    shadowColor: theme.orange,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,

@@ -1,9 +1,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useApp } from '../context/AppContext';
 import DashboardScreen from '../screens/DashboardScreen';
 import IncomeScreen from '../screens/IncomeScreen';
 import ExpenseScreen from '../screens/ExpenseScreen';
@@ -39,14 +39,20 @@ function TabBarIcon({ name, focused }) {
 }
 
 export default function AppNavigator() {
-  const { t } = useApp();
+  const { t, colors, state } = useApp();
+  const darkMode = state?.settings?.darkMode;
+  const styles = getStyles(colors);
+
   return (
     <NavigationContainer>
+      <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
           tabBarStyle: styles.tabBar,
           tabBarShowLabel: false,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.navInactive,
         }}
       >
         <Tab.Screen
@@ -84,19 +90,19 @@ export default function AppNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   tabBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: Platform.OS === 'ios' ? 88 : 72,
-    backgroundColor: colors.navBackground,
+    height: Platform?.OS === 'ios' ? 88 : 72,
+    backgroundColor: theme.navBackground,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderTopWidth: 0,
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-    shadowColor: colors.primary,
+    paddingBottom: Platform?.OS === 'ios' ? 20 : 8,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: -8 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
@@ -112,17 +118,17 @@ const styles = StyleSheet.create({
     minWidth: 56,
   },
   iconWrapperActive: {
-    backgroundColor: colors.navActiveBg,
+    backgroundColor: theme.navActiveBg,
   },
   label: {
     fontSize: 5,
     fontWeight: '600',
-    color: colors.navInactive,
+    color: theme.navInactive,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginTop: 2,
   },
   labelActive: {
-    color: colors.primary,
+    color: theme.primary,
   },
 });

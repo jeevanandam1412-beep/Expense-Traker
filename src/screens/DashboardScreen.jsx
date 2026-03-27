@@ -6,15 +6,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
-import { colors } from '../theme/colors';
 import Header from '../components/Header';
 import TransactionCard from '../components/TransactionCard';
 import AddModal from '../components/AddModal';
 
 export default function DashboardScreen({ navigation }) {
-  const { state, actions, t } = useApp();
+  const { state, actions, t, colors } = useApp();
   const { income, expenses, borrowed, settings } = state;
   const currency = settings?.currency || '₹';
+  const styles = getStyles(colors);
 
   const [modalType, setModalType] = useState(null);
   const [editItem, setEditItem] = useState(null);
@@ -52,10 +52,10 @@ export default function DashboardScreen({ navigation }) {
   };
 
   const handleDelete = (item) => {
-    Alert.alert('Delete Entry', 'Remove this transaction?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('delete'), t('delete_confirm'), [
+      { text: t('cancel'), style: 'cancel' },
       { 
-        text: 'Delete', 
+        text: t('delete'), 
         style: 'destructive', 
         onPress: () => {
           if (item.type === 'income') actions.deleteIncome(item.id);
@@ -209,48 +209,47 @@ function WeeklyChart({ income, expenses, t }) {
   );
 }
 
-const HEADER_HEIGHT = Platform.OS === 'ios' ? 130 : 110;
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const getStyles = (theme) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.background },
   scroll: { flex: 1 },
   content: { paddingTop: 16, paddingBottom: 120 },
   cardsRow: { paddingLeft: 20, marginBottom: 8 },
   summaryCard: {
     width: 155,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: theme.surfaceContainerLowest,
     borderRadius: 16,
     padding: 18,
-    shadowColor: colors.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.06,
     shadowRadius: 16,
     elevation: 4,
   },
-  summaryLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: colors.onSurfaceVariant, marginBottom: 6 },
+  summaryLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, color: theme.onSurfaceVariant, marginBottom: 6 },
   summaryValue: { fontSize: 20, fontWeight: '800' },
   section: { paddingHorizontal: 20, marginTop: 20 },
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.onSurface, marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: theme.onSurface, marginBottom: 12 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  viewAll: { fontSize: 12, fontWeight: '700', color: colors.primary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  viewAll: { fontSize: 12, fontWeight: '700', color: theme.primary, textTransform: 'uppercase', letterSpacing: 0.5 },
   quickActions: { flexDirection: 'row', gap: 12 },
   quickAction: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 20, borderRadius: 16, gap: 6 },
   quickLabel: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
   chartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  chartSub: { fontSize: 9, fontWeight: '700', color: colors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 1 },
-  chartBox: { backgroundColor: colors.surfaceContainerLow, borderRadius: 16, padding: 16 },
+  chartSub: { fontSize: 9, fontWeight: '700', color: theme.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 1 },
+  chartBox: { backgroundColor: theme.surfaceContainerLow, borderRadius: 16, padding: 16 },
   chartBars: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 100, marginBottom: 8 },
   barGroup: { flex: 1, alignItems: 'center', gap: 4 },
   barStack: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
   bar: { width: 10, borderRadius: 4 },
-  barIncome: { backgroundColor: colors.tertiary },
-  barExpense: { backgroundColor: colors.secondary },
-  barLabel: { fontSize: 9, color: colors.onSurfaceVariant, textTransform: 'uppercase', fontWeight: '600' },
+  barIncome: { backgroundColor: theme.tertiary },
+  barExpense: { backgroundColor: theme.secondary },
+  barLabel: { fontSize: 9, color: theme.onSurfaceVariant, textTransform: 'uppercase', fontWeight: '600' },
   legend: { flexDirection: 'row', gap: 16, marginTop: 4 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: 11, color: colors.onSurfaceVariant, fontWeight: '500' },
+  legendText: { fontSize: 11, color: theme.onSurfaceVariant, fontWeight: '500' },
   empty: { alignItems: 'center', paddingVertical: 32, gap: 8 },
-  emptyText: { fontSize: 15, fontWeight: '700', color: colors.onSurfaceVariant },
-  emptySubText: { fontSize: 12, color: colors.outline },
+  emptyText: { fontSize: 15, fontWeight: '700', color: theme.onSurfaceVariant },
+  emptySubText: { fontSize: 12, color: theme.outline },
 });

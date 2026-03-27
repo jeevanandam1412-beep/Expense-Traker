@@ -4,7 +4,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
-import { colors } from '../theme/colors';
 import Header from '../components/Header';
 import TransactionCard from '../components/TransactionCard';
 import AddModal from '../components/AddModal';
@@ -24,9 +23,10 @@ function inFilter(dateStr, filter) {
 }
 
 export default function IncomeScreen() {
-  const { state, actions } = useApp();
+  const { state, actions, t, colors } = useApp();
   const { income, settings } = state;
   const currency = settings?.currency || '₹';
+  const styles = getStyles(colors);
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All'); // All, This Month, This Year
@@ -80,11 +80,11 @@ export default function IncomeScreen() {
 
   return (
     <View style={styles.root}>
-      <Header title="Income" />
+      <Header title={t('income')} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Total Banner */}
         <View style={styles.totalBanner}>
-          <Text style={styles.totalLabel}>TOTAL INCOME ({filter})</Text>
+          <Text style={styles.totalLabel}>{t('total_income')} ({t(filter.toLowerCase().replace(' ', '_'))})</Text>
           <Text style={styles.totalValue}>{currency}{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
         </View>
 
@@ -93,7 +93,7 @@ export default function IncomeScreen() {
           <Ionicons name="search-outline" size={18} color={colors.outline} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search income..."
+            placeholder={t('search_income')}
             placeholderTextColor={colors.outline}
             value={search}
             onChangeText={setSearch}
@@ -118,8 +118,8 @@ export default function IncomeScreen() {
         {Object.keys(grouped).length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="cash-outline" size={48} color={colors.outline} />
-            <Text style={styles.emptyText}>No income entries</Text>
-            <Text style={styles.emptySubText}>Tap + to add income</Text>
+            <Text style={styles.emptyText}>{t('no_income')}</Text>
+            <Text style={styles.emptySubText}>{t('quick_add')}</Text>
           </View>
         ) : (
           Object.entries(grouped).map(([dateLabel, items]) => (
@@ -157,57 +157,57 @@ export default function IncomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const getStyles = (theme) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.background },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 120 },
   totalBanner: {
-    backgroundColor: colors.tertiary + '15',
+    backgroundColor: theme.tertiary + '15',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: colors.tertiary,
+    borderLeftColor: theme.tertiary,
   },
-  totalLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: colors.tertiary, marginBottom: 4 },
-  totalValue: { fontSize: 26, fontWeight: '800', color: colors.tertiary },
+  totalLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: theme.tertiary, marginBottom: 4 },
+  totalValue: { fontSize: 26, fontWeight: '800', color: theme.tertiary },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: theme.surfaceContainerLow,
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 10,
     marginBottom: 12,
   },
-  searchInput: { flex: 1, fontSize: 15, color: colors.onSurface },
+  searchInput: { flex: 1, fontSize: 15, color: theme.onSurface },
   filterRow: { marginBottom: 16, marginHorizontal: -20, paddingLeft: 20 },
   chip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: colors.surfaceContainerHigh,
+    backgroundColor: theme.surfaceContainerHigh,
   },
-  chipActive: { backgroundColor: colors.primaryContainer },
-  chipText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },
-  chipTextActive: { color: '#fff' },
+  chipActive: { backgroundColor: theme.primaryContainer },
+  chipText: { fontSize: 13, fontWeight: '600', color: theme.onSurfaceVariant },
+  chipTextActive: { color: theme.onPrimaryContainer },
   group: { marginBottom: 20 },
-  groupLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: colors.onSurfaceVariant, marginBottom: 8 },
+  groupLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, color: theme.onSurfaceVariant, marginBottom: 8 },
   empty: { alignItems: 'center', paddingVertical: 60, gap: 8 },
-  emptyText: { fontSize: 16, fontWeight: '700', color: colors.onSurfaceVariant },
-  emptySubText: { fontSize: 13, color: colors.outline },
+  emptyText: { fontSize: 16, fontWeight: '700', color: theme.onSurfaceVariant },
+  emptySubText: { fontSize: 13, color: theme.outline },
   fab: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 108 : 88,
+    bottom: Platform?.OS === 'ios' ? 108 : 88,
     right: 20,
     width: 60,
     height: 60,
     borderRadius: 20,
-    backgroundColor: colors.tertiary,
+    backgroundColor: theme.tertiary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.tertiary,
+    shadowColor: theme.tertiary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,

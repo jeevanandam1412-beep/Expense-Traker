@@ -1,5 +1,5 @@
 // Material Design 3 Color Tokens
-export const colors = {
+const light = {
   primary: '#4D41DF',
   primaryContainer: '#675DF9',
   onPrimary: '#FFFFFF',
@@ -50,4 +50,57 @@ export const colors = {
   navActiveBg: '#F1F3F9',
 };
 
-export default colors;
+const dark = {
+  primary: '#C4C0FF',
+  primaryContainer: '#3529C6',
+  onPrimary: '#190065',
+  onPrimaryContainer: '#E3E0FF',
+  primaryFixed: '#E3DFFF',
+  primaryFixedDim: '#C4C0FF',
+  secondary: '#FFB2BC',
+  secondaryContainer: '#900030',
+  onSecondary: '#67001E',
+  onSecondaryContainer: '#FFD9DD',
+  secondaryFixed: '#FFD9DD',
+  secondaryFixedDim: '#FFB2BC',
+  tertiary: '#49DEB1',
+  tertiaryContainer: '#00513C',
+  onTertiary: '#003828',
+  onTertiaryContainer: '#6BFBCD',
+  tertiaryFixed: '#6BFBCD',
+  tertiaryFixedDim: '#49DEB1',
+  surface: '#111318',
+  surfaceBright: '#37393E',
+  surfaceDim: '#111318',
+  surfaceVariant: '#44474E',
+  surfaceContainer: '#1F2025',
+  surfaceContainerLow: '#191C20',
+  surfaceContainerHigh: '#292A2F',
+  surfaceContainerHighest: '#34353A',
+  surfaceContainerLowest: '#0C0E13',
+  onSurface: '#E2E2E9',
+  onSurfaceVariant: '#C4C6D0',
+  onBackground: '#E2E2E9',
+  background: '#111318',
+  outline: '#8E9099',
+  outlineVariant: '#44474E',
+  error: '#FFB4AB',
+  errorContainer: '#93000A',
+  onError: '#690005',
+  onErrorContainer: '#FFDAD6',
+  inverseSurface: '#E2E2E9',
+  inverseOnSurface: '#2F3036',
+  inversePrimary: '#4D41DF',
+  surfaceTint: '#C4C0FF',
+  orange: '#FFB266',
+  gradientStart: '#3529C6',
+  gradientEnd: '#4D41DF',
+  navBackground: 'rgba(17,19,24,0.92)',
+  navActive: '#C4C0FF',
+  navInactive: 'rgba(226,226,233,0.5)',
+  navActiveBg: '#1F2025',
+};
+
+export const themes = { light, dark };
+export const colors = light;
+export default light;
