@@ -72,7 +72,7 @@ export default function SettingsScreen({ navigation }) {
         </View>
 
         {/* Preferences */}
-        <SectionHeader title={t('preferences')} icon="options-outline" />
+        <SectionHeader title={t('preferences')} icon="options-outline" theme={colors} />
         <View style={styles.card}>
           <TouchableOpacity style={styles.settingRow} onPress={() => setShowCurrencyPicker(true)}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -84,7 +84,7 @@ export default function SettingsScreen({ navigation }) {
               <Ionicons name="chevron-forward" size={16} color={colors.onSurfaceVariant} />
             </View>
           </TouchableOpacity>
-          <Divider />
+          <Divider theme={colors} />
           <View style={styles.settingRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={styles.iconBox}><Ionicons name="language-outline" size={20} color={colors.primary} /></View>
@@ -99,7 +99,7 @@ export default function SettingsScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-          <Divider />
+          <Divider theme={colors} />
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
               <Ionicons name="moon-outline" size={20} color={colors.primary} />
@@ -154,9 +154,11 @@ export default function SettingsScreen({ navigation }) {
 }
 
 function SectionHeader({ title, icon, color, theme }) {
+  if (!theme) return null;
+  const styles = getStyles(theme);
   return (
-    <View style={getStyles(theme).sectionHeader}>
-      <Text style={[getStyles(theme).sectionTitle, color && { color }]}>{title}</Text>
+    <View style={styles.sectionHeader}>
+      <Text style={[styles.sectionTitle, color && { color }]}>{title}</Text>
       <Ionicons name={icon} size={18} color={color || theme.primary + '60'} />
     </View>
   );
@@ -185,6 +187,7 @@ function SettingField({ label, value, onChangeText, placeholder, icon, secureTex
 }
 
 function Divider({ theme }) {
+  if (!theme) return null;
   return <View style={getStyles(theme).divider} />;
 }
 

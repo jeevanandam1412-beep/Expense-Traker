@@ -10,7 +10,7 @@ import ExpenseScreen from '../screens/ExpenseScreen';
 import BorrowedLentScreen from '../screens/BorrowedLentScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import { useApp } from '../context/AppContext';
+
 
 const Tab = createBottomTabNavigator();
 

@@ -226,10 +226,10 @@ export default function ReportsScreen() {
 
         {/* Summary Grid */}
         <View style={styles.summaryGrid}>
-          <StatCard label={t('total_income')} value={`${currency}${fmt(data.totalIncome)}`} color={colors.tertiary} />
-          <StatCard label={t('total_expense')} value={`${currency}${fmt(data.totalExpense)}`} color={colors.secondary} />
-          <StatCard label={t('net_profit')} value={`${currency}${fmt(data.netProfit)}`} color={data.netProfit >= 0 ? colors.primary : colors.error} />
-          <StatCard label={t('transactions')} value={`${data.transactions}`} color={colors.onSurface} />
+          <StatCard label={t('total_income')} value={`${currency}${fmt(data.totalIncome)}`} color={colors.tertiary} theme={colors} />
+          <StatCard label={t('total_expense')} value={`${currency}${fmt(data.totalExpense)}`} color={colors.secondary} theme={colors} />
+          <StatCard label={t('net_profit')} value={`${currency}${fmt(data.netProfit)}`} color={data.netProfit >= 0 ? colors.primary : colors.error} theme={colors} />
+          <StatCard label={t('transactions')} value={`${data.transactions}`} color={colors.onSurface} theme={colors} />
         </View>
 
         {/* Cash Flow Chart */}
@@ -314,7 +314,8 @@ export default function ReportsScreen() {
   );
 }
 
-function StatCard({ label, value, color }) {
+function StatCard({ label, value, color, theme }) {
+  const styles = getStyles(theme);
   return (
     <View style={styles.statCard}>
       <Text style={styles.statLabel}>{label}</Text>

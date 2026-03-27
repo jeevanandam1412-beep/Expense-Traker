@@ -80,21 +80,21 @@ export default function DashboardScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         {/* Summary Cards */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardsRow} contentContainerStyle={{ gap: 12, paddingRight: 20 }}>
-          <SummaryCard label={t('total_income')} value={`${currency}${fmt(totals.totalIncome)}`} color={colors.tertiary} icon="trending-up" />
-          <SummaryCard label={t('total_expense')} value={`${currency}${fmt(totals.totalExpense)}`} color={colors.secondary} icon="trending-down" />
-          <SummaryCard label={t('net_profit')} value={`${currency}${fmt(totals.profit)}`} color={colors.primary} icon="analytics" accent />
-          <SummaryCard label={t('total_borrowed')} value={`${currency}${fmt(totals.totalBorrowed)}`} color={colors.orange} icon="people" />
-          <SummaryCard label={t('type_lent')} value={`${currency}${fmt(totals.totalLent)}`} color="#8B5CF6" icon="arrow-up-circle" />
-        </ScrollView>
+        <View style={styles.summaryGrid}>
+          <SummaryCard label={t('total_income')} value={`${currency}${fmt(totals.totalIncome)}`} color={colors.tertiary} icon="trending-up" theme={colors} />
+          <SummaryCard label={t('total_expense')} value={`${currency}${fmt(totals.totalExpense)}`} color={colors.secondary} icon="trending-down" theme={colors} />
+          <SummaryCard label={t('net_profit')} value={`${currency}${fmt(totals.profit)}`} color={colors.primary} icon="analytics" accent theme={colors} />
+          <SummaryCard label={t('total_borrowed')} value={`${currency}${fmt(totals.totalBorrowed)}`} color={colors.orange} icon="people" theme={colors} />
+          <SummaryCard label={t('type_lent')} value={`${currency}${fmt(totals.totalLent)}`} color="#8B5CF6" icon="arrow-up-circle" theme={colors} />
+        </View>
 
         {/* Quick Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('quick_add')}</Text>
           <View style={styles.quickActions}>
-            <QuickAction label={t('income')} icon="add-circle" color={colors.tertiary} onPress={() => { setEditItem(null); setModalType('income'); }} />
-            <QuickAction label={t('expenses')} icon="remove-circle" color={colors.secondary} onPress={() => { setEditItem(null); setModalType('expense'); }} />
-            <QuickAction label={t('borrowed')} icon="people" color={colors.orange} onPress={() => { setEditItem(null); setModalType('borrowed'); }} />
+            <QuickAction label={t('income')} icon="add-circle" color={colors.tertiary} onPress={() => { setEditItem(null); setModalType('income'); }} theme={colors} />
+            <QuickAction label={t('expenses')} icon="remove-circle" color={colors.secondary} onPress={() => { setEditItem(null); setModalType('expense'); }} theme={colors} />
+            <QuickAction label={t('borrowed')} icon="people" color={colors.orange} onPress={() => { setEditItem(null); setModalType('borrowed'); }} theme={colors} />
           </View>
         </View>
 
@@ -104,7 +104,7 @@ export default function DashboardScreen({ navigation }) {
             <Text style={styles.sectionTitle}>{t('cash_flow_analysis')}</Text>
             <Text style={styles.chartSub}>{t('last_7_days')}</Text>
           </View>
-          <WeeklyChart income={income} expenses={expenses} t={t} />
+          <WeeklyChart income={income} expenses={expenses} t={t} theme={colors} />
         </View>
 
         {/* Recent Transactions */}
@@ -147,7 +147,8 @@ export default function DashboardScreen({ navigation }) {
   );
 }
 
-function SummaryCard({ label, value, color, icon, accent }) {
+function SummaryCard({ label, value, color, icon, accent, theme }) {
+  const styles = getStyles(theme);
   return (
     <View style={[styles.summaryCard, accent && { backgroundColor: color }, !accent && { borderLeftWidth: 4, borderLeftColor: color }]}>
       <Text style={[styles.summaryLabel, accent && { color: 'rgba(255,255,255,0.8)' }]}>{label}</Text>
@@ -156,7 +157,8 @@ function SummaryCard({ label, value, color, icon, accent }) {
   );
 }
 
-function QuickAction({ label, icon, color, onPress }) {
+function QuickAction({ label, icon, color, onPress, theme }) {
+  const styles = getStyles(theme);
   return (
     <TouchableOpacity
       style={[styles.quickAction, { backgroundColor: color + '1A' }]}
@@ -169,7 +171,8 @@ function QuickAction({ label, icon, color, onPress }) {
   );
 }
 
-function WeeklyChart({ income, expenses, t }) {
+function WeeklyChart({ income, expenses, t, theme }) {
+  const styles = getStyles(theme);
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const now = new Date();
   const maxH = 80;
@@ -202,8 +205,8 @@ function WeeklyChart({ income, expenses, t }) {
         ))}
       </View>
       <View style={styles.legend}>
-        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.tertiary }]} /><Text style={styles.legendText}>{t('income')}</Text></View>
-        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: colors.secondary }]} /><Text style={styles.legendText}>{t('expenses')}</Text></View>
+        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: theme.tertiary }]} /><Text style={styles.legendText}>{t('income')}</Text></View>
+        <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: theme.secondary }]} /><Text style={styles.legendText}>{t('expenses')}</Text></View>
       </View>
     </View>
   );
@@ -214,9 +217,16 @@ const getStyles = (theme) => StyleSheet.create({
   root: { flex: 1, backgroundColor: theme.background },
   scroll: { flex: 1 },
   content: { paddingTop: 16, paddingBottom: 120 },
-  cardsRow: { paddingLeft: 20, marginBottom: 8 },
+  summaryGrid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    paddingHorizontal: 20, 
+    justifyContent: 'space-between',
+    rowGap: 12,
+    marginBottom: 8 
+  },
   summaryCard: {
-    width: 155,
+    width: '48.3%',
     backgroundColor: theme.surfaceContainerLowest,
     borderRadius: 16,
     padding: 18,
